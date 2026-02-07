@@ -99,9 +99,13 @@ interface ExperienceChild {
     relationship: string;
 }
 
+/**
+ * ALID Experience mapping
+ * Note: experienceId is redundant and will be auto-derived from the experience array.
+ * You only need to provide the alid value.
+ */
 interface ALIDExperience {
     alid: string;
-    experienceId: string;
 }
 
 export enum ImagePurpose {

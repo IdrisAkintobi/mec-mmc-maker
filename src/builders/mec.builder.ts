@@ -1,6 +1,14 @@
 import { XML_PREFIX, xmlBuilder } from '../infrastructure/xml.builder';
-import { CastMember, ContentIdentifier, Genre, LocalizedInfo, MECData, Rating, ReleaseHistory } from '../types/mec.types';
-
+import {
+    CastMember,
+    ContentIdentifier,
+    Genre,
+    LocalizedInfo,
+    MECData,
+    Rating,
+    ReleaseHistory,
+} from '../types/mec.types';
+import { generateTitleSort } from '../helpers/title-sort.helper';
 
 /**
  * Builder class for creating Media Entertainment Core (MEC) XML files.
@@ -82,7 +90,8 @@ export class MECBuilder {
         return localizedInfo.map((info, index) => ({
             '@language': info.language,
             'md:TitleDisplayUnlimited': info.titleDisplay,
-            ...(info.titleSort && { 'md:TitleSort': info.titleSort }),
+            // Auto-generate TitleSort if not provided
+            'md:TitleSort': info.titleSort ?? generateTitleSort(info.titleDisplay),
             ...(info.summary190 && { 'md:Summary190': info.summary190 }),
             ...(info.summary400 && { 'md:Summary400': info.summary400 }),
             ...(info.artReference && {

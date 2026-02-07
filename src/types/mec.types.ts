@@ -58,7 +58,12 @@ export interface LocalizedInfo {
     language: string;
     /** Display title for the content */
     titleDisplay: string;
-    /** Sort title (optional, used for alphabetical sorting) */
+    /**
+     * Sort title - AUTOMATICALLY GENERATED from titleDisplay
+     * The system removes leading articles ('The', 'A', 'An') for proper alphabetical sorting.
+     * You should NOT provide this field - it will be ignored and auto-generated.
+     * Note: Required by MovieLabs XSD but not used by Amazon Prime Video.
+     */
     titleSort?: string;
     /** Short summary (max 190 characters) */
     summary190?: string;

@@ -15,3 +15,45 @@ export { type ExperienceType, type ImagePurpose, type MMCData } from './types/mm
 
 // Validation
 export { validateXMLStructure } from './helpers/xml-validator';
+
+// Utilities
+export { calculateAspectRatio } from './helpers/aspect-ratio.helper';
+export { generateTitleSort } from './helpers/title-sort.helper';
+export {
+    generateMovieLabsID,
+    extractContentSlug,
+    extractOrganization,
+    MovieLabsIDGenerator,
+    type MovieLabsIDConfig,
+    type IDType,
+} from './helpers/movielabs-id.generator';
+export {
+    extractReleaseYear,
+    getWorkTypeSuffix,
+    autoPopulateMECFields,
+    autoPopulateMMCFields,
+    createAutoPopulateConfig,
+    type AutoPopulateConfig,
+} from './helpers/auto-populate.helper';
+export {
+    validateMovieLabsID,
+    validateContentID,
+    validateBatchIDs,
+    validateALIDExperienceMatch,
+    validatePresentationReferences,
+    validateAspectRatio,
+    validateMECData,
+    validateMMCData,
+    type ValidationResult,
+} from './helpers/validation.helper';
+export {
+    validateLanguageCode,
+    validateLanguageCodes,
+    validateGenreCode,
+    validateGenreCodes,
+    validateRatingSystem,
+    getSupportedLanguages,
+    getSupportedGenres,
+    suggestGenres,
+    suggestLanguages,
+} from './helpers/language-genre-validation.helper';

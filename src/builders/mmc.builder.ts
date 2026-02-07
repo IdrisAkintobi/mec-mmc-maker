@@ -1,3 +1,4 @@
+import { calculateAspectRatio } from '../helpers/aspect-ratio.helper';
 import { XML_PREFIX, xmlBuilder } from '../infrastructure/xml.builder';
 import { MMCData } from '../types/mmc.types';
 
@@ -44,9 +45,10 @@ export class MMCBuilder {
                 'md:Picture': {
                     'md:WidthPixels': video.picture.widthPixels,
                     'md:HeightPixels': video.picture.heightPixels,
-                    ...(video.picture.aspectRatio && {
-                        'md:AspectRatio': video.picture.aspectRatio,
-                    }),
+                    // Auto-calculate aspect ratio if not provided
+                    'md:AspectRatio':
+                        video.picture.aspectRatio ??
+                        calculateAspectRatio(video.picture.widthPixels, video.picture.heightPixels),
                     ...(video.picture.progressive !== undefined && {
                         'md:Progressive': video.picture.progressive,
                     }),
@@ -129,9 +131,10 @@ export class MMCBuilder {
 
     private static buildALIDMaps(data: MMCData) {
         return {
-            'manifest:ALIDExperienceMap': data.alidExperience.map(map => ({
+            'manifest:ALIDExperienceMap': data.alidExperience.map((map, index) => ({
                 'manifest:ALID': map.alid,
-                'manifest:ExperienceID': map.experienceId,
+                // Auto-derive experienceId from corresponding experience
+                'manifest:ExperienceID': data.experience[index]?.id,
             })),
         };
     }
