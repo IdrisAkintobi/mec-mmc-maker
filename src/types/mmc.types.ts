@@ -33,79 +33,97 @@ export interface MMCData {
     alidExperience: ALIDExperience[];
 }
 
-interface AudioTrack {
-    trackId: string;
+export interface AudioTrack {
+    /** Track ID - OPTIONAL: Will be auto-generated if not provided */
+    trackId?: string;
     type: string;
     language: string;
     location: string;
+    /** MD5 hash - OPTIONAL: Not all content providers have hashes */
     hash?: string;
 }
 
-interface VideoTrack {
-    trackId: string;
+export interface VideoTrack {
+    /** Track ID - OPTIONAL: Will be auto-generated if not provided */
+    trackId?: string;
     type: string;
     language: string;
     location: string;
-    hash: string;
+    /** MD5 hash - OPTIONAL: Not all content providers have hashes */
+    hash?: string;
     picture: {
         heightPixels: string;
         widthPixels: string;
+        /** Aspect ratio - OPTIONAL: Will be auto-calculated from dimensions if not provided */
         aspectRatio?: string;
         progressive?: boolean;
         progressiveScanOrder?: string;
     };
 }
 
-interface SubtitleTrack {
-    trackId: string;
+export interface SubtitleTrack {
+    /** Track ID - OPTIONAL: Will be auto-generated if not provided */
+    trackId?: string;
     type: string;
     language: string;
     location: string;
-    hash: string;
+    /** MD5 hash - OPTIONAL: Not all content providers have hashes */
+    hash?: string;
     frameRate: string;
     frameRateMultiplier: string;
     frameRateTimeCode: string;
 }
 
-interface ImageAsset {
-    id: string;
+export interface ImageAsset {
+    /** Image ID - OPTIONAL: Will be auto-generated if not provided */
+    id?: string;
     purpose: ImagePurpose;
     language: string;
     location: string;
 }
 
-interface Presentation {
-    id: string;
-    trackNum: string;
-    videoId: string;
-    audioId: string;
+export interface Presentation {
+    /** Presentation ID - OPTIONAL: Will be auto-generated if not provided */
+    id?: string;
+    /** Track number - OPTIONAL: Defaults to "0" if not provided */
+    trackNum?: string;
+    /** Video Track ID - OPTIONAL: Will be auto-generated if not provided */
+    videoId?: string;
+    /** Audio Track ID - OPTIONAL: Will be auto-generated if not provided */
+    audioId?: string;
+    /** Subtitle Track ID - OPTIONAL: Only needed if subtitles exist */
     subtitleId?: string;
 }
 
-interface PictureGroup {
-    id: string;
+export interface PictureGroup {
+    /** Picture Group ID - OPTIONAL: Will be auto-generated if not provided */
+    id?: string;
     imageIds: string[];
 }
 
-interface Experience {
-    id: string;
+export interface Experience {
+    /** Experience ID - OPTIONAL: Will be auto-generated if not provided */
+    id?: string;
     type: ExperienceType;
     subType: string;
     child?: ExperienceChild;
 }
 
-interface ExperienceChild {
+export interface ExperienceChild {
     id: string;
     relationship: string;
 }
 
 /**
  * ALID Experience mapping
- * Note: experienceId is redundant and will be auto-derived from the experience array.
- * You only need to provide the alid value.
+ * Note: Both alid and experienceId are OPTIONAL and will be auto-generated if not provided.
+ * The experienceId will be auto-derived from the experience array.
  */
-interface ALIDExperience {
-    alid: string;
+export interface ALIDExperience {
+    /** ALID - OPTIONAL: Will be auto-generated if not provided */
+    alid?: string;
+    /** Experience ID - OPTIONAL: Auto-derived from experience array */
+    experienceId?: string;
 }
 
 export enum ImagePurpose {

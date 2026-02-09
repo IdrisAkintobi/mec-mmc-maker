@@ -11,7 +11,20 @@ export {
     type ReleaseType,
     type WorkType,
 } from './types/mec.types';
-export { type ExperienceType, type ImagePurpose, type MMCData } from './types/mmc.types';
+export {
+    type ExperienceType,
+    type ImagePurpose,
+    type MMCData,
+    type AudioTrack,
+    type VideoTrack,
+    type SubtitleTrack,
+    type ImageAsset,
+    type Presentation,
+    type PictureGroup,
+    type Experience,
+    type ExperienceChild,
+    type ALIDExperience,
+} from './types/mmc.types';
 
 // Validation
 export { validateXMLStructure } from './helpers/xml-validator';

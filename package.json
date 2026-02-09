@@ -15,7 +15,6 @@
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "lint": "eslint src/",
         "lint:fix": "eslint --ext=.ts ./src ./test --fix",
-        "prepare": "husky",
         "prepublishOnly": "npm test && npm run lint",
         "preversion": "npm run lint",
         "version": "npm run format && git add -A src",
