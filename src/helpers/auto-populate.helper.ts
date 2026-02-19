@@ -23,6 +23,28 @@ export interface AutoPopulateConfig {
 }
 
 /**
+ * Convert title to URL-safe slug
+ * @param title - Display title (e.g., "The Matrix: Reloaded")
+ * @returns URL-safe slug (e.g., "the-matrix-reloaded")
+ *
+ * @example
+ * titleToSlug("The Matrix") // returns "the-matrix"
+ * titleToSlug("Spider-Man 2") // returns "spider-man-2"
+ */
+export function titleToSlug(title: string): string {
+    if (!title) {
+        throw new Error('Title is required for slug generation');
+    }
+
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+}
+
+/**
  * Extract release year from release date
  * @param releaseDate - Date in YYYY-MM-DD format
  * @returns Year as string (e.g., "2023")
@@ -71,7 +93,10 @@ export function getWorkTypeSuffix(workType: string): string {
  * @param config - Auto-populate configuration
  * @returns Complete MEC data with auto-populated fields
  */
-export function autoPopulateMECFields(data: Record<string, unknown>, config: AutoPopulateConfig): Record<string, unknown> {
+export function autoPopulateMECFields(
+    data: Record<string, unknown>,
+    config: AutoPopulateConfig,
+): Record<string, unknown> {
     const {
         organization,
         identifierNamespace = 'ORG',
@@ -87,20 +112,25 @@ export function autoPopulateMECFields(data: Record<string, unknown>, config: Aut
         ContentID:
             data.ContentID ||
             (() => {
-                if (!data.TitleSlug) {
-                    throw new Error('Either ContentID or TitleSlug must be provided');
+                if (!data.TitleDisplay) {
+                    throw new Error('Either ContentID or TitleDisplay must be provided');
                 }
-                return `md:cid:org:${organization}:${data.TitleSlug as string}`;
+                const slug = titleToSlug(data.TitleDisplay as string);
+                return `md:cid:org:${organization}:${slug}`;
             })(),
 
         // Extract ReleaseYear from ReleaseDate if not provided
-        ReleaseYear: data.ReleaseYear || (typeof data.ReleaseDate === 'string' ? extractReleaseYear(data.ReleaseDate) : undefined),
+        ReleaseYear:
+            data.ReleaseYear ||
+            (typeof data.ReleaseDate === 'string' ? extractReleaseYear(data.ReleaseDate) : undefined),
 
         // Set Identifier:Namespace to default if not provided
         'Identifier:Namespace': data['Identifier:Namespace'] || identifierNamespace,
 
         // Auto-derive Identifier from ContentID if not provided
-        Identifier: data.Identifier || (typeof data.ContentID === 'string' ? extractContentSlug(data.ContentID) : data.TitleSlug),
+        Identifier:
+            data.Identifier ||
+            (typeof data.ContentID === 'string' ? extractContentSlug(data.ContentID) : data.TitleSlug),
 
         // Set organization fields if not provided
         OrganizationID: data.OrganizationID || organization,
