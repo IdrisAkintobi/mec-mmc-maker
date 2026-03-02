@@ -1,6 +1,6 @@
- 
 // Ported from mdmec-xml-maker, type definitions need reconciliation
 import { generateTitleSort } from '../helpers/title-sort.helper';
+import { titleToSlug } from '../helpers/auto-populate.helper';
 import { CategoryEnum, RelationshipTypeEnum } from '../types/csv/enum/domain.enums';
 import { MECCSVData } from '../types/csv/mec-parsed.type';
 import {
@@ -74,11 +74,25 @@ export class MECMapper {
         'md:Parent': MdParent;
     } {
         const sequenceNumber = data['SequenceNumber'];
-        const parentContentID = data['ParentContentID'];
+        let parentContentID = data['ParentContentID'];
 
         if (!sequenceNumber || !parentContentID) {
             console.log({ sequenceNumber, parentContentID });
             throw new Error('SequenceNumber and ParentContentID must be provided for Episode and Season');
+        }
+
+        // Auto-generate ParentContentID if it's a simple title (not a full MovieLabs ID)
+        if (!parentContentID.startsWith('md:cid:')) {
+            // Extract organization from the current ContentID
+            // Format: md:cid:org:wiflix:content-slug
+            const contentIdParts = data.ContentID.split(':');
+            const organization = contentIdParts[3] || 'wiflix'; // Default to 'wiflix' if not found
+
+            // Convert title to slug
+            const titleSlug = titleToSlug(parentContentID);
+
+            // Generate full MovieLabs ID
+            parentContentID = `md:cid:org:${organization}:${titleSlug}`;
         }
 
         return {
