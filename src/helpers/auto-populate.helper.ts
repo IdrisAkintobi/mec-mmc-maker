@@ -30,6 +30,7 @@ export interface AutoPopulateConfig {
  * @example
  * titleToSlug("The Matrix") // returns "the-matrix"
  * titleToSlug("Spider-Man 2") // returns "spider-man-2"
+ * titleToSlug("Game_of_Thrones") // returns "game_of_thrones"
  */
 export function titleToSlug(title: string): string {
     if (!title) {
@@ -38,7 +39,7 @@ export function titleToSlug(title: string): string {
 
     return title
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/[^a-z0-9\s\-_]/g, '') // Remove special characters, preserve hyphens and underscores
         .replace(/\s+/g, '-') // Replace spaces with hyphens
         .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
         .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
