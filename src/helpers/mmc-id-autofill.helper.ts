@@ -1,9 +1,11 @@
 import { extractContentSlugFromURL } from './content-slug-extractor.helper';
+import { titleToSlug } from './auto-populate.helper';
 
 /**
  * Generic MMC data structure for auto-filling IDs
  */
 export interface MMCDataWithIDs {
+    TitleDisplay?: string;
     VideoLocation?: string;
     VideoTrackID?: string;
     AudioLocation?: string;
@@ -23,7 +25,7 @@ export interface MMCDataWithIDs {
 }
 
 /**
- * Auto-fill missing MMC IDs from VideoLocation URL
+ * Auto-fill missing MMC IDs from TitleDisplay or VideoLocation URL
  * This is a fallback when user doesn't provide MovieLabs IDs
  * Handles multiple audio/subtitle tracks by generating sequential IDs
  *
@@ -33,18 +35,36 @@ export interface MMCDataWithIDs {
  *
  * @example
  * ```typescript
+ * // Using TitleDisplay (preferred - matches MEC ContentID)
  * const data = {
+ *   TitleDisplay: 'Football Nation Episode 1',
+ *   VideoLocation: 'video.mp4',
+ *   AudioLocation: 'audio.aac'
+ * };
+ * const filled = autofillMMCIDs(data, 'wiflix');
+ * // filled.VideoTrackID = 'md:vidtrackid:org:wiflix:football-nation-episode-1:video'
+ *
+ * // Using VideoLocation (fallback)
+ * const data2 = {
  *   VideoLocation: 'https://s3.amazonaws.com/wiflix-content/my-movie/video.mp4',
  *   AudioLocation: 'path/to/audio1.mp4;path/to/audio2.mp4'
  * };
- * const filled = autofillMMCIDs(data, 'wiflix');
- * // filled.VideoTrackID = 'md:vidtrackid:org:wiflix:my-movie:video'
- * // filled.AudioTrackID = 'md:audiotrackid:org:wiflix:my-movie:audio1;md:audiotrackid:org:wiflix:my-movie:audio2'
+ * const filled2 = autofillMMCIDs(data2, 'wiflix');
+ * // filled2.VideoTrackID = 'md:vidtrackid:org:wiflix:my-movie:video'
+ * // filled2.AudioTrackID = 'md:audiotrackid:org:wiflix:my-movie:audio1;md:audiotrackid:org:wiflix:my-movie:audio2'
  * ```
  */
 export function autofillMMCIDs<T extends MMCDataWithIDs>(data: T, organization: string = 'default-org'): T {
-    // Extract content slug from VideoLocation
-    const contentSlug = extractContentSlugFromURL(data.VideoLocation || '');
+    // Extract content slug from TitleDisplay (preferred) or VideoLocation (fallback)
+    let contentSlug: string;
+
+    if (data.TitleDisplay) {
+        // Use TitleDisplay to generate slug (matches MEC ContentID)
+        contentSlug = titleToSlug(data.TitleDisplay);
+    } else {
+        // Fallback to extracting from VideoLocation URL
+        contentSlug = extractContentSlugFromURL(data.VideoLocation || '');
+    }
 
     // Helper function to generate multiple IDs based on count
     const generateMultipleIDs = (

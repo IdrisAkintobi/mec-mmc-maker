@@ -15,6 +15,15 @@ export type mmcParsedType = MMCCSVData;
  */
 export type MMCCSVData = {
     /**
+     * Display title for the content
+     * OPTIONAL: If provided, will be used to generate content slug for all IDs
+     * This ensures MMC IDs match MEC ContentID (same title = same IDs)
+     * If not provided, content slug will be extracted from VideoLocation URL
+     * @example "Football Nation Episode 1" → slug: "football-nation-episode-1"
+     */
+    TitleDisplay?: string;
+
+    /**
      * Each Audio element is a string separated by ';' e.g AudiTrackID01;AudiTrackID02
      * OPTIONAL: Will be auto-generated from organization + content slug if not provided
      */
