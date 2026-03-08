@@ -1,5 +1,5 @@
 {
-    "name": "mec-mmc-maker",
+    "name": "@idrisakintobi/mec-mmc-maker",
     "version": "1.0.0",
     "description": "A modern TypeScript library for building MEC and MMC XML files for Amazon Prime",
     "main": "dist/main.js",
@@ -9,6 +9,9 @@
         "LICENSE",
         "README.md"
     ],
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
     "scripts": {
         "build": "rm -rf dist && tsc",
         "test": "jest",
