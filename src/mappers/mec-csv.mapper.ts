@@ -1,7 +1,7 @@
 // Ported from mdmec-xml-maker, type definitions need reconciliation
 import { generateTitleSort } from '../helpers/title-sort.helper';
 import { titleToSlug } from '../helpers/auto-populate.helper';
-import { CategoryEnum, RelationshipTypeEnum } from '../types/csv/enum/domain.enums';
+import { RelationshipTypeEnum } from '../types/csv/enum/domain.enums';
 import { MECCSVData } from '../types/csv/mec-parsed.type';
 import {
     MdAltIdentifier,
