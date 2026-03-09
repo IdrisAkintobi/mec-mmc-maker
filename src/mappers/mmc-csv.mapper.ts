@@ -1,4 +1,3 @@
- 
 // Ported from mdmec-xml-maker, type definitions need reconciliation
 import { calculateAspectRatio } from '../helpers/aspect-ratio.helper';
 import { MMCCSVData } from '../types/csv/mmc-parsed.type';
@@ -39,7 +38,7 @@ export class MMCMapper {
                     'manifest:Profile': 'MMC-1',
                 },
                 'manifest:Inventory': {
-                    ...(data.AudioTrackID && { 'manifest:Audio': this.mapAudios(data) }),
+                    'manifest:Audio': data.AudioTrackID ? this.mapAudios(data) : [],
                     'manifest:Video': this.mapVideos(data),
                     ...(data.SubtitleTrackID && { 'manifest:Subtitle': this.mapSubtitles(data) }),
                     ...(data.ImageID && { 'manifest:Image': this.mapImages(data) }),
@@ -47,7 +46,7 @@ export class MMCMapper {
                 'manifest:Presentations': {
                     'manifest:Presentation': this.mapPresentations(data),
                 },
-                ...(data.PictureGroupID && { 'manifest:PictureGroups': this.mapPictureGroup(data) }),
+                'manifest:PictureGroups': data.PictureGroupID ? this.mapPictureGroup(data) : [],
                 'manifest:Experiences': this.mapExperience(data),
                 'manifest:ALIDExperienceMaps': {
                     'manifest:ALIDExperienceMap': this.mapALIDExperience(data),
@@ -58,7 +57,7 @@ export class MMCMapper {
         return mmcSchema;
     }
 
-    private static mapALIDExperience(data: mmcParsedType): manifestALIDExperienceMap['manifest:ALIDExperienceMap'] {
+    private static mapALIDExperience(data: MMCCSVData): manifestALIDExperienceMap['manifest:ALIDExperienceMap'] {
         const alid = data.ALID?.split(';') || [''];
 
         // Auto-derive ALIDExperienceID from ExperienceID (redundancy removal)
@@ -81,7 +80,7 @@ export class MMCMapper {
         return alidArray;
     }
 
-    private static mapExperience(data: mmcParsedType): manifestExperience[] {
+    private static mapExperience(data: MMCCSVData): manifestExperience[] {
         const experienceID = data.ExperienceID?.split(';') || [''];
         const experienceType = data.ExperienceType.split(';');
         const experienceSubType = data.ExperienceSubType.split(';');
@@ -122,7 +121,10 @@ export class MMCMapper {
         return manifestPresentations;
     }
 
-    private static mapChildExperience(experienceId: string, relationship: string) {
+    private static mapChildExperience(experienceId: string | undefined, relationship: string | undefined) {
+        if (!experienceId || !relationship) {
+            return [];
+        }
         const childExperienceID = experienceId.split(';');
         const childRelationship = relationship.split(';');
 
@@ -143,7 +145,7 @@ export class MMCMapper {
         return childExperiences;
     }
 
-    private static mapPictureGroup(data: mmcParsedType): manifestPictureGroup[] {
+    private static mapPictureGroup(data: MMCCSVData): manifestPictureGroup[] {
         const pictureGroupIDs = data.PictureGroupID?.split('||') || [''];
         const pictureGroupImageID = data.PictureGroupImageID?.split('||') || [''];
 
@@ -157,9 +159,11 @@ export class MMCMapper {
 
         for (let i = 0; i < pictureGroupIDs.length; i++) {
             manifestImages.push({
-                '@PictureGroupID': pictureGroupIDs[i]?.trim(),
-                'manifest:Picture': {
-                    'manifest:ImageID': this.mapPictureGroupImages(pictureGroupImageID[i]),
+                'manifest:PictureGroup': {
+                    '@PictureGroupID': pictureGroupIDs[i]?.trim(),
+                    'manifest:Picture': {
+                        'manifest:ImageID': this.mapPictureGroupImages(pictureGroupImageID[i]),
+                    },
                 },
             });
         }
@@ -167,14 +171,12 @@ export class MMCMapper {
         return manifestImages;
     }
 
-    private static mapPictureGroupImages(data: string): Record<'$', string>[] {
+    private static mapPictureGroupImages(data: string): string[] {
         const pictureGroupImages = data.split(';');
-        return pictureGroupImages.map(i => ({
-            $: i,
-        }));
+        return pictureGroupImages.map(i => i.trim());
     }
 
-    private static mapPresentations(data: mmcParsedType): manifestPresentation['manifest:Presentation'] {
+    private static mapPresentations(data: MMCCSVData): manifestPresentation['manifest:Presentation'] {
         const presentationIDs = data.PresentationID?.split('||') || [''];
         const presentationIDTrackNum = data.PresentationIDTrackNum?.split('||') || ['0'];
         const presentationIDVid = data.PresentationIDVid?.split('||') || [''];
@@ -235,7 +237,7 @@ export class MMCMapper {
         }));
     }
 
-    private static mapSubtitles(data: mmcParsedType): manifestSubtitle[] {
+    private static mapSubtitles(data: MMCCSVData): manifestSubtitle[] {
         const subtitleIDs = data.SubtitleTrackID?.split(';') || [''];
         const types = data.SubtitleType.split(';');
         const languages = data.SubtitleLanguage.split(';');
@@ -287,7 +289,7 @@ export class MMCMapper {
         return manifestSubtitles;
     }
 
-    private static mapImages(data: mmcParsedType): manifestImage[] {
+    private static mapImages(data: MMCCSVData): manifestImage[] {
         const imageIDs = data.ImageID?.split(';') || [''];
         const purposes = data.ImagePurpose.split(';');
         const languages = data.ImageLanguage.split(';');
@@ -315,7 +317,7 @@ export class MMCMapper {
         return manifestImages;
     }
 
-    private static mapAudios(data: mmcParsedType): manifestAudio[] {
+    private static mapAudios(data: MMCCSVData): manifestAudio[] {
         const trackIDs = data.AudioTrackID?.split(';') || [''];
         const types = data.AudioType.split(';');
         const languages = data.AudioLanguage.split(';');
@@ -349,7 +351,7 @@ export class MMCMapper {
         return manifestAudios;
     }
 
-    private static mapVideos(data: mmcParsedType): manifestVideo[] {
+    private static mapVideos(data: MMCCSVData): manifestVideo[] {
         // Validate required fields with detailed error messages
         if (!data.VideoType) {
             const fields = Object.keys(data).slice(0, 10).join(', ');
@@ -402,8 +404,10 @@ export class MMCMapper {
                     'md:WidthPixels': widthPx[i]?.trim(),
                     ...(aspectRatio[i] && { 'md:AspectRatio': aspectRatio[i] }),
                     ...(progressive[i] && {
-                        ...(progressiveScanOrder[i] && { '@scanOrder': progressiveScanOrder[i] }),
-                        'md:Progressive': data.Progressive,
+                        'md:Progressive': {
+                            '@scanOrder': progressiveScanOrder[i] || '',
+                            $: progressive[i],
+                        },
                     }),
                 },
                 'manifest:ContainerReference': {

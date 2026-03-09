@@ -24,7 +24,7 @@ export class MECMapper {
         const category = data['Category'];
 
         // check if it is an episode or season
-        const requireSequence = category === CategoryEnum.Episode || category === CategoryEnum.Season;
+        const requireSequence = category === 'episode' || category === 'season';
 
         const mecSchema: MECSchemaType = {
             'mdmec:CoreMetadata': {
@@ -67,8 +67,8 @@ export class MECMapper {
     }
 
     private static mapCategory(
-        data: mecParsedType,
-        category: CategoryEnum,
+        data: MECCSVData,
+        category: 'episode' | 'season',
     ): {
         'md:SequenceInfo': MdSequenceInfo;
         'md:Parent': MdParent;
@@ -95,18 +95,21 @@ export class MECMapper {
             parentContentID = `md:cid:org:${organization}:${titleSlug}`;
         }
 
+        // Map category to relationship type
+        const relationshipType = category === 'episode' ? RelationshipTypeEnum.Episode : RelationshipTypeEnum.Season;
+
         return {
             'md:SequenceInfo': {
                 'md:Number': sequenceNumber,
             },
             'md:Parent': {
-                '@relationshipType': RelationshipTypeEnum[category],
+                '@relationshipType': relationshipType,
                 'md:ParentContentID': parentContentID,
             },
         };
     }
 
-    private static mapArtReference(data: mecParsedType): MdArtReference[] {
+    private static mapArtReference(data: MECCSVData): MdArtReference[] {
         const reference = data['ArtReference'].split(';');
         const resolution = data['ArtReference:resolution'].split(';');
         const purpose = data['ArtReference:purpose'].split(';');
@@ -132,7 +135,7 @@ export class MECMapper {
         return artReference;
     }
 
-    private static mapGenre(data: mecParsedType): MdGenre[] {
+    private static mapGenre(data: MECCSVData): MdGenre[] {
         if (!data['Genre']) {
             throw new Error('Genre can not be empty');
         }
@@ -162,12 +165,12 @@ export class MECMapper {
         return genreArray;
     }
 
-    private static mapLocalizedInfo(data: mecParsedType): MdLocalizedInfo[] {
+    private static mapLocalizedInfo(data: MECCSVData): MdLocalizedInfo[] {
         const languages = data['LocalizedInfo:language'].split(';');
         const titleDisplay = data['TitleDisplay'].split(';');
 
         // Auto-generate TitleSort from TitleDisplay
-        const titleSort = titleDisplay.map(title => generateTitleSort(title));
+        const titleSort = titleDisplay.map((title: string) => generateTitleSort(title));
 
         const summary400 = data['Summary400'].split(';');
         const summary190 = data['Summary190'].split(';');
@@ -188,9 +191,9 @@ export class MECMapper {
                 'md:TitleDisplayUnlimited': titleDisplay[i],
                 // TitleSort is always generated (either from input or auto-generated)
                 'md:TitleSort': titleSort[i]?.trim() || '',
+                'md:Summary400': summary400[i]?.trim() || '',
                 ...(i === 0 && data.ArtReference && { ['md:ArtReference']: this.mapArtReference(data) }),
                 ...(data['Summary190'] && { 'md:Summary190': summary190[i]?.trim() }),
-                ...(data['Summary400'] && { 'md:Summary400': summary400[i]?.trim() }),
                 ...(i === 0 && { ['md:Genre']: this.mapGenre(data) }),
             });
         }
@@ -198,7 +201,7 @@ export class MECMapper {
         return localizedInfo;
     }
 
-    private static mapReleaseHistory(data: mecParsedType): MdReleaseHistory[] {
+    private static mapReleaseHistory(data: MECCSVData): MdReleaseHistory[] {
         // If no release history provided, create a default one from ReleaseDate
         if (!data['ReleaseHistory:Type'] || !data['ReleaseHistory:Country'] || !data['ReleaseHistory:Date']) {
             return [
@@ -239,7 +242,7 @@ export class MECMapper {
         return releaseHistory;
     }
 
-    private static mapAltIdentifier(data: mecParsedType): MdAltIdentifier[] {
+    private static mapAltIdentifier(data: MECCSVData): MdAltIdentifier[] {
         // If no identifier provided, create default from ContentID
         if (!data['Identifier:Namespace'] || !data['Identifier']) {
             // Extract identifier from ContentID (e.g., "md:cid:org:wiflix:chioma" -> "chioma")
@@ -275,7 +278,7 @@ export class MECMapper {
         return altIdentifier;
     }
 
-    private static mapRating(data: mecParsedType): MdRating[] {
+    private static mapRating(data: MECCSVData): MdRating[] {
         // If Rating is "Yes" but details not provided, throw error
         if (!data['Rating:Country'] || !data['Rating:System'] || !data['Rating:Value']) {
             throw new Error('When Rating is "Yes", Rating:Country, Rating:System, and Rating:Value are required');
@@ -306,7 +309,7 @@ export class MECMapper {
         return rating;
     }
 
-    private static mapPeopleDisplayNames(displayNameObj, currIndex: number): MdDisplay[] {
+    private static mapPeopleDisplayNames(displayNameObj: Record<string, string[]>, currIndex: number): MdDisplay[] {
         const peopleDisplayNames = [];
 
         for (const lang in displayNameObj) {
@@ -319,7 +322,7 @@ export class MECMapper {
         return peopleDisplayNames;
     }
 
-    private static mapPeople(data: mecParsedType): MdPerson[] {
+    private static mapPeople(data: MECCSVData): MdPerson[] {
         // If no cast information provided, return empty array
         if (
             !data['Cast:DisplayName'] ||
@@ -346,10 +349,13 @@ export class MECMapper {
             throw new Error('JobFunction, BillingBlockOrder, and Cast:DisplayName arrays must have the same length');
         }
 
-        const displayNameObj: Record<string, string[]> = displayNameLanguages.reduce((acc, item, index) => {
-            acc[item] = displayNames[index].split(';');
-            return acc;
-        }, {});
+        const displayNameObj: Record<string, string[]> = displayNameLanguages.reduce(
+            (acc: Record<string, string[]>, item: string, index: number) => {
+                acc[item] = displayNames[index].split(';');
+                return acc;
+            },
+            {},
+        );
 
         // Check if all language names ae of the same length and if the names length is the same as the functions
         const isSameLength = Object.values(displayNameObj).every(i => i.length === jobFunction.length);

@@ -47,7 +47,7 @@ export type manifestExperience = {
         '@ExperienceID': string;
         'manifest:Audiovisual': manifestAudiovisual;
         'manifest:PictureGroupID'?: string;
-        'manifest:ExperienceChild'?: manifestExperienceChild;
+        'manifest:ExperienceChild'?: manifestExperienceChild[];
     };
 };
 
@@ -82,9 +82,9 @@ export type manifestPicture = {
 
 export type manifestTrackMetadata = {
     'manifest:TrackSelectionNumber': string;
-    'manifest:VideoTrackReference': manifestVideoTrackReference;
-    'manifest:AudioTrackReference': manifestAudioTrackReference;
-    'manifest:SubtitleTrackReference': manifestSubtitleTrackReference[];
+    'manifest:VideoTrackReference': manifestVideoTrackReference[];
+    'manifest:AudioTrackReference'?: manifestAudioTrackReference[];
+    'manifest:SubtitleTrackReference'?: manifestSubtitleTrackReference[];
 };
 
 export type manifestVideoTrackReference = {
