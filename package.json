@@ -1,6 +1,6 @@
 {
     "name": "mec-mmc-maker",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "A modern TypeScript library for building MEC and MMC XML files for Amazon Prime",
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
