@@ -40,7 +40,9 @@ export class MMCMapper {
                 'manifest:Inventory': {
                     'manifest:Audio': data.AudioTrackID ? this.mapAudios(data) : [],
                     'manifest:Video': this.mapVideos(data),
-                    ...(data.SubtitleTrackID && { 'manifest:Subtitle': this.mapSubtitles(data) }),
+                    ...(data.SubtitleType &&
+                        data.SubtitleLanguage &&
+                        data.SubtitleLocation && { 'manifest:Subtitle': this.mapSubtitles(data) }),
                     ...(data.ImageID && { 'manifest:Image': this.mapImages(data) }),
                 },
                 'manifest:Presentations': {
