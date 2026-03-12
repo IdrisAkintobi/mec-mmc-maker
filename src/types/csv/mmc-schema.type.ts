@@ -127,7 +127,7 @@ export type mdEncoding = {
 };
 
 export type mdFrameRate = {
-    '@multiplier': string;
+    '@multiplier'?: string;
     '@timecode': string;
     $: string;
 };

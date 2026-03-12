@@ -244,8 +244,8 @@ export class MMCMapper {
         const locations = data.SubtitleLocation.split(';');
         const hashes = data.SubtitleHash?.split(';') || [];
         const frameRate = data.SubtitleFrameRate.split(';');
-        const frameRateMultiplier = data.SubtitleFrameRateMultiplier.split(';');
-        const frameRateTimecode = data.SubtitleFrameRateTimeCode.split(';');
+        const frameRateMultiplier = data.SubtitleFrameRateMultiplier?.split(';') || [];
+        const frameRateTimecode = data.SubtitleFrameRateTimeCode?.split(';') || [];
 
         // check if all arrays have the same length
         if (
@@ -269,8 +269,8 @@ export class MMCMapper {
                 'md:Language': languages[i]?.trim(),
                 'md:Encoding': {
                     'md:FrameRate': {
-                        '@multiplier': frameRateMultiplier[i]?.trim(),
-                        '@timecode': frameRateTimecode[i]?.trim(),
+                        ...(frameRateMultiplier[i] && { '@multiplier': frameRateMultiplier[i]?.trim() }),
+                        '@timecode': frameRateTimecode[i]?.trim() || 'NonDrop',
                         $: frameRate[i]?.trim(),
                     },
                 },

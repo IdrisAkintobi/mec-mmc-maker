@@ -33,45 +33,51 @@ const mecData: MECData = {
             titleSort: 'Sample Movie',
             summary190: 'A short summary of the movie',
             summary400: 'A longer, more detailed summary of the movie content',
-            artReference: [{
-                reference: 'path/to/cover.jpg',
-                resolution: '1920x1080',
-                purpose: 'cover'
-            }]
-        }
+            artReference: [
+                {
+                    reference: 'path/to/cover.jpg',
+                    resolution: '1920x1080',
+                    purpose: 'cover',
+                },
+            ],
+        },
     ],
-    genre: [
-        { primary: 'Action', subGenre: ['Adventure', 'Thriller'] }
-    ],
+    genre: [{ primary: 'Action', subGenre: ['Adventure', 'Thriller'] }],
     releaseYear: '2023',
     releaseDate: '2023-12-25',
-    releaseHistory: [{
-        type: ReleaseType.Theatrical,
-        country: 'US',
-        date: '2023-12-25'
-    }],
+    releaseHistory: [
+        {
+            type: ReleaseType.Theatrical,
+            country: 'US',
+            date: '2023-12-25',
+        },
+    ],
     workType: WorkType.Movie,
-    identifier: [{
-        namespace: NamespaceType.EIDR,
-        value: '10.5240/1234-5678-90AB-CDEF-GHIJ-K'
-    }],
-    cast: [{
-        jobFunction: 'Actor',
-        billingBlockOrder: '1',
-        displayName: {
-            'en-US': 'John Doe',
-            'es-ES': 'Juan Pérez'
-        }
-    }],
+    identifier: [
+        {
+            namespace: NamespaceType.EIDR,
+            value: '10.5240/1234-5678-90AB-CDEF-GHIJ-K',
+        },
+    ],
+    cast: [
+        {
+            jobFunction: 'Actor',
+            billingBlockOrder: '1',
+            displayName: {
+                'en-US': 'John Doe',
+                'es-ES': 'Juan Pérez',
+            },
+        },
+    ],
     originalLanguage: 'en',
     organization: {
         id: 'org123',
-        role: 'Producer'
+        role: 'Producer',
     },
     companyDisplayCredit: {
         value: 'Sample Studios',
-        language: 'en-US'
-    }
+        language: 'en-US',
+    },
 };
 
 const mecXml = MECBuilder.build(mecData);
@@ -84,42 +90,52 @@ console.log(mecXml); // <?xml version="1.0" encoding="UTF-8"?>...
 import { MMCBuilder, MMCData, ExperienceType, ImagePurpose } from 'mec-mmc-maker';
 
 const mmcData: MMCData = {
-    audio: [{
-        trackId: 'audio1',
-        type: 'Primary',
-        language: 'en',
-        location: 'path/to/audio.mp4',
-        hash: 'abc123'
-    }],
-    video: [{
-        trackId: 'video1',
-        type: 'Primary',
-        language: 'en',
-        location: 'path/to/video.mp4',
-        hash: 'def456',
-        picture: {
-            heightPixels: '1080',
-            widthPixels: '1920',
-            aspectRatio: '16:9',
-            progressive: true,
-            progressiveScanOrder: 'Top'
-        }
-    }],
-    presentation: [{
-        id: 'pres1',
-        trackNum: '1',
-        videoId: 'video1',
-        audioId: 'audio1'
-    }],
-    experience: [{
-        id: 'exp1',
-        type: ExperienceType.Movie,
-        subType: 'Feature'
-    }],
-    alidExperience: [{
-        alid: 'alid1',
-        experienceId: 'exp1'
-    }]
+    audio: [
+        {
+            trackId: 'audio1',
+            type: 'Primary',
+            language: 'en',
+            location: 'path/to/audio.mp4',
+            hash: 'abc123',
+        },
+    ],
+    video: [
+        {
+            trackId: 'video1',
+            type: 'Primary',
+            language: 'en',
+            location: 'path/to/video.mp4',
+            hash: 'def456',
+            picture: {
+                heightPixels: '1080',
+                widthPixels: '1920',
+                aspectRatio: '16:9',
+                progressive: true,
+                progressiveScanOrder: 'Top',
+            },
+        },
+    ],
+    presentation: [
+        {
+            id: 'pres1',
+            trackNum: '1',
+            videoId: 'video1',
+            audioId: 'audio1',
+        },
+    ],
+    experience: [
+        {
+            id: 'exp1',
+            type: ExperienceType.Movie,
+            subType: 'Feature',
+        },
+    ],
+    alidExperience: [
+        {
+            alid: 'alid1',
+            experienceId: 'exp1',
+        },
+    ],
 };
 
 const mmcXml = MMCBuilder.build(mmcData);
@@ -142,26 +158,27 @@ All interfaces and methods include comprehensive JSDoc comments. Your IDE will p
 
 ### Key Interfaces
 
-- **`MECData`**: Complete metadata structure for MEC XML
-- **`MMCData`**: Complete manifest structure for MMC XML
-- **`LocalizedInfo`**: Language-specific metadata
-- **`Genre`**: Genre classification (max 3 total)
-- **`CastMember`**: Cast and crew information
+-   **`MECData`**: Complete metadata structure for MEC XML
+-   **`MMCData`**: Complete manifest structure for MMC XML
+-   **`LocalizedInfo`**: Language-specific metadata
+-   **`Genre`**: Genre classification (max 3 total)
+-   **`CastMember`**: Cast and crew information
 
 ### Builder Classes
 
-- **`MECBuilder.build(data: MECData): string`**: Generates MEC XML
-- **`MMCBuilder.build(data: MMCData): string`**: Generates MMC XML
+-   **`MECBuilder.build(data: MECData): string`**: Generates MEC XML
+-   **`MMCBuilder.build(data: MMCData): string`**: Generates MMC XML
 
 ## Migration from mdmec-xml-maker
 
 If you're migrating from the old `mdmec-xml-maker` library, see our [Migration Guide](./MIGRATION.md) for detailed instructions and examples.
 
 **Key Changes:**
-- Object structures instead of semicolon-delimited strings
-- camelCase property names instead of PascalCase
-- Builder classes instead of function exports
-- Strong TypeScript types with full IntelliSense
+
+-   Object structures instead of semicolon-delimited strings
+-   camelCase property names instead of PascalCase
+-   Builder classes instead of function exports
+-   Strong TypeScript types with full IntelliSense
 
 ## Examples
 
@@ -185,7 +202,21 @@ npm test
 
 MIT Licensed. See [LICENSE](./LICENSE) file for details.
 
+## MovieLabs Specification
+
+This library generates XML files compliant with:
+
+-   MovieLabs MEC (Media Entertainment Core) v2.9
+-   MovieLabs MMC (Media Manifest Core) v1.9
+
+### Documentation Resources
+
+-   [MovieLabs Specifications](http://www.movielabs.com/md/)
+-   [Amazon Prime Video - MEC Title Metadata Guide](https://videocentral.amazon.com/support/delivery-experience/mec-title-meta-data)
+-   [Amazon Prime Video - MMC Asset Manifest Guide](https://videocentral.amazon.com/support/delivery-experience/mmc-asset-manifest)
+-   [Amazon Prime Video - Metadata Overview](https://videocentral.amazon.com/support/delivery-experience/metadata-guide)
+-   [Amazon Prime Video Content Delivery](https://videodirect.amazon.com/)
+
 ## Related
 
-- [MovieLabs Specifications](http://www.movielabs.com/md/)
-- [Amazon Prime Video Content Delivery](https://videodirect.amazon.com/)
+-   [mec-xml-formatter](https://github.com/Wi-flx/mec-mmc-formatter) - REST API service using this library
