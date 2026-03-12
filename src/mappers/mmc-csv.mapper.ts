@@ -249,16 +249,16 @@ export class MMCMapper {
         const frameRateMultiplier = data.SubtitleFrameRateMultiplier?.split(';') || [];
         const frameRateTimecode = data.SubtitleFrameRateTimeCode?.split(';') || [];
 
-        // check if all arrays have the same length
+        // check if all REQUIRED arrays have the same length
         if (
             subtitleIDs.length !== types.length ||
+            types.length !== languages.length ||
             languages.length !== locations.length ||
-            frameRateMultiplier.length !== frameRateTimecode.length ||
-            frameRateTimecode.length !== frameRate.length
+            locations.length !== frameRate.length
         ) {
-            console.log({ subtitleIDs, languages, frameRateMultiplier, frameRateTimecode });
+            console.log({ subtitleIDs, types, languages, locations, frameRate });
             throw new Error(
-                'SubtitleTrackID, SubtitleType, SubtitleLanguage, SubtitleLocation, SubtitleFrameRateMultiplier, SubtitleFrameRate, and SubtitleFrameRateTimeCode  must have the same length',
+                'SubtitleTrackID, SubtitleType, SubtitleLanguage, SubtitleLocation, and SubtitleFrameRate must have the same length',
             );
         }
 
