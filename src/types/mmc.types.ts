@@ -69,9 +69,12 @@ export interface SubtitleTrack {
     location: string;
     /** MD5 hash - OPTIONAL: Not all content providers have hashes */
     hash?: string;
+    /** Frame rate - REQUIRED: e.g., "23.976", "24", "25", "29.97" */
     frameRate: string;
-    frameRateMultiplier: string;
-    frameRateTimeCode: string;
+    /** Frame rate multiplier - OPTIONAL: e.g., "1001/1000" */
+    frameRateMultiplier?: string;
+    /** Frame rate timecode - OPTIONAL: Defaults to "NonDrop" */
+    frameRateTimeCode?: string;
 }
 
 export interface ImageAsset {

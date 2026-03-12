@@ -64,12 +64,14 @@ export class MMCBuilder {
                     'md:Language': sub.language,
                     'manifest:ContainerReference': {
                         'manifest:ContainerLocation': sub.location,
-                        'manifest:Hash': sub.hash,
+                        ...(sub.hash && { 'manifest:Hash': sub.hash }),
                     },
                     'manifest:Encoding': {
                         'manifest:FrameRate': sub.frameRate,
-                        'manifest:FrameRateMultiplier': sub.frameRateMultiplier,
-                        'manifest:TimeCodeDropFrame': sub.frameRateTimeCode,
+                        ...(sub.frameRateMultiplier && {
+                            'manifest:FrameRateMultiplier': sub.frameRateMultiplier,
+                        }),
+                        'manifest:TimeCodeDropFrame': sub.frameRateTimeCode || 'NonDrop',
                     },
                 })),
             }),
