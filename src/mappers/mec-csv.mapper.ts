@@ -52,7 +52,7 @@ export class MECMapper {
                         '@organizationID': data['OrganizationID'],
                         '@role': data['OrganizationRole'],
                     },
-                    ...(requireSequence && this.mapParentAndSequence(data, workType as 'episode' | 'season')),
+                    ...(requireSequence && this.mapParentAndSequence(data, workType)),
                 },
                 'mdmec:CompanyDisplayCredit': {
                     'md:DisplayString': {
