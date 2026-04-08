@@ -1,6 +1,5 @@
-// Ported from mdmec-xml-maker, type definitions need reconciliation
-import { generateTitleSort } from '../helpers/title-sort.helper';
 import { titleToSlug } from '../helpers/auto-populate.helper';
+import { generateTitleSort } from '../helpers/title-sort.helper';
 import { RelationshipTypeEnum } from '../types/csv/enum/domain.enums';
 import { MECCSVData } from '../types/csv/mec-parsed.type';
 import {
@@ -247,7 +246,7 @@ export class MECMapper {
         if (!data['Identifier:Namespace'] || !data['Identifier']) {
             // Extract identifier from ContentID (e.g., "md:cid:org:wiflix:chioma" -> "chioma")
             const contentIdParts = data.ContentID?.split(':') || [];
-            const defaultIdentifier = contentIdParts.at(-1) || 'unknown';
+            const defaultIdentifier = contentIdParts[contentIdParts.length - 1] || 'unknown';
 
             return [
                 {
