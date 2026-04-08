@@ -185,16 +185,30 @@ export class MECMapper {
         const localizedInfo = [];
 
         for (let i = 0; i < languages.length; i++) {
-            localizedInfo.push({
+            const info: Partial<MdLocalizedInfo> = {
                 '@language': languages[i],
                 'md:TitleDisplayUnlimited': titleDisplay[i],
                 // TitleSort is always generated (either from input or auto-generated)
                 'md:TitleSort': titleSort[i]?.trim() || '',
-                'md:Summary400': summary400[i]?.trim() || '',
-                ...(i === 0 && data.ArtReference && { ['md:ArtReference']: this.mapArtReference(data) }),
-                ...(data['Summary190'] && { 'md:Summary190': summary190[i]?.trim() }),
-                ...(i === 0 && { ['md:Genre']: this.mapGenre(data) }),
-            });
+            };
+
+            // Add ArtReference before summaries (only for first language)
+            if (i === 0 && data.ArtReference) {
+                info['md:ArtReference'] = this.mapArtReference(data);
+            }
+
+            // Add summaries after ArtReference
+            info['md:Summary400'] = summary400[i]?.trim() || '';
+            if (data['Summary190']) {
+                info['md:Summary190'] = summary190[i]?.trim();
+            }
+
+            // Add genre last (only for first language)
+            if (i === 0) {
+                info['md:Genre'] = this.mapGenre(data);
+            }
+
+            localizedInfo.push(info as MdLocalizedInfo);
         }
 
         return localizedInfo;
