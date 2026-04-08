@@ -87,23 +87,38 @@ export class MECBuilder {
     }
 
     private static buildLocalizedInfo(localizedInfo: LocalizedInfo[], genre: Genre[]) {
-        return localizedInfo.map((info, index) => ({
-            '@language': info.language,
-            'md:TitleDisplayUnlimited': info.titleDisplay,
-            // Auto-generate TitleSort if not provided
-            'md:TitleSort': info.titleSort ?? generateTitleSort(info.titleDisplay),
-            ...(info.artReference && {
-                'md:ArtReference': info.artReference.map(art => ({
+        return localizedInfo.map((info, index) => {
+            const result: Record<string, unknown> = {
+                '@language': info.language,
+                'md:TitleDisplayUnlimited': info.titleDisplay,
+                // Auto-generate TitleSort if not provided
+                'md:TitleSort': info.titleSort ?? generateTitleSort(info.titleDisplay),
+            };
+
+            // Add artReference if available
+            if (info.artReference) {
+                result['md:ArtReference'] = info.artReference.map(art => ({
                     '@resolution': art.resolution,
                     '@purpose': art.purpose,
                     $: art.reference,
-                })),
-            }),
-            ...(info.summary190 && { 'md:Summary190': info.summary190 }),
-            ...(info.summary400 && { 'md:Summary400': info.summary400 }),
+                }));
+            }
+
+            // Add summaries after artReference
+            if (info.summary190) {
+                result['md:Summary190'] = info.summary190;
+            }
+            if (info.summary400) {
+                result['md:Summary400'] = info.summary400;
+            }
+
             // Add genre only to the first localized info (default language)
-            ...(index === 0 && genre.length > 0 && { 'md:Genre': this.buildGenre(genre) }),
-        }));
+            if (index === 0 && genre.length > 0) {
+                result['md:Genre'] = this.buildGenre(genre);
+            }
+
+            return result;
+        });
     }
 
     private static buildReleaseHistory(history: ReleaseHistory[]) {
