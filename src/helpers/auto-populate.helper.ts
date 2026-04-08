@@ -70,7 +70,7 @@ export function extractReleaseYear(releaseDate: string): string {
 
 /**
  * Get work type suffix for track IDs based on work type
- * @param workType - Type of work (movie, episode, season, series, promotion)
+ * @param workType - Type of work (movie, episode, season, series, promotion, supplemental)
  * @returns Suffix for track IDs (e.g., "feature", "episode")
  */
 export function getWorkTypeSuffix(workType: string): string {

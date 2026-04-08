@@ -166,6 +166,7 @@ export enum WorkType {
     Promotion = 'promotion',
     Season = 'season',
     Series = 'series',
+    Supplemental = 'supplemental',
 }
 
 export enum CategoryEnum {

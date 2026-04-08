@@ -20,10 +20,11 @@ const MAX_GENRE = 3;
 export class MECMapper {
     static map(data: MECCSVData): MECSchemaType {
         const useRating = data['Rating']?.toLowerCase() === 'yes';
-        const category = data['Category'];
+        // Normalize WorkType to lowercase
+        const workType = data['WorkType']?.toLowerCase();
 
-        // check if it is an episode or season
-        const requireSequence = category === 'episode' || category === 'season';
+        // check if it is an episode or season (requires parent and sequence info)
+        const requireSequence = workType === 'episode' || workType === 'season';
 
         const mecSchema: MECSchemaType = {
             'mdmec:CoreMetadata': {
@@ -38,7 +39,7 @@ export class MECMapper {
 
                     'md:ReleaseDate': data['ReleaseDate'],
                     'md:ReleaseHistory': this.mapReleaseHistory(data),
-                    'md:WorkType': data['WorkType'],
+                    'md:WorkType': workType,
                     'md:AltIdentifier': this.mapAltIdentifier(data),
                     'md:RatingSet': useRating
                         ? {
@@ -51,7 +52,7 @@ export class MECMapper {
                         '@organizationID': data['OrganizationID'],
                         '@role': data['OrganizationRole'],
                     },
-                    ...(requireSequence && this.mapCategory(data, category)),
+                    ...(requireSequence && this.mapParentAndSequence(data, workType as 'episode' | 'season')),
                 },
                 'mdmec:CompanyDisplayCredit': {
                     'md:DisplayString': {
@@ -65,9 +66,9 @@ export class MECMapper {
         return mecSchema;
     }
 
-    private static mapCategory(
+    private static mapParentAndSequence(
         data: MECCSVData,
-        category: 'episode' | 'season',
+        workType: 'episode' | 'season',
     ): {
         'md:SequenceInfo': MdSequenceInfo;
         'md:Parent': MdParent;
@@ -94,8 +95,8 @@ export class MECMapper {
             parentContentID = `md:cid:org:${organization}:${titleSlug}`;
         }
 
-        // Map category to relationship type
-        const relationshipType = category === 'episode' ? RelationshipTypeEnum.Episode : RelationshipTypeEnum.Season;
+        // Map workType to relationship type
+        const relationshipType = workType === 'episode' ? RelationshipTypeEnum.Episode : RelationshipTypeEnum.Season;
 
         return {
             'md:SequenceInfo': {

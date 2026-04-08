@@ -14,7 +14,7 @@ export type ReleaseType =
     | 'Theatrical'
     | 'SVOD';
 
-export type WorkType = 'movie' | 'episode' | 'promotion' | 'season' | 'series';
+export type WorkType = 'movie' | 'episode' | 'promotion' | 'season' | 'series' | 'supplemental';
 
 export type RelationshipType = 'isepisodeof' | 'isseasonof' | 'ispromotionfor';
 
@@ -115,6 +115,12 @@ export type MECCSVData = {
 
     /**
      * @optional Only required for episodic content (episodes, seasons)
+     * Note: ParentContentID and SequenceNumber are automatically determined from WorkType.
+     * If WorkType is 'episode' or 'season', these fields are required.
+     */
+    /**
+     * @deprecated Category field is no longer needed. Use WorkType instead.
+     * The system automatically determines parent/sequence requirements from WorkType.
      */
     Category?: CategoryEnum;
     SequenceNumber?: string;
