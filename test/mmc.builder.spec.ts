@@ -1,6 +1,6 @@
 import { MMCBuilder } from '../src/builders/mmc.builder';
 import { validateXMLStructure } from '../src/helpers/xml-validator';
-import { ExperienceType, MMCData } from '../src/types/mmc.types';
+import { AudioType, ExperienceType, MMCData } from '../src/types/mmc.types';
 import { sampleMMCData as sampleData } from './sample-data/mmc-sample';
 
 describe('MMCBuilder', () => {
@@ -93,21 +93,21 @@ describe('MMCBuilder', () => {
             sampleMMCData.audio = [
                 {
                     trackId: 'audio_en',
-                    type: 'Primary',
+                    type: AudioType.Primary,
                     language: 'en',
                     location: 'path/to/audio_en.mp4',
                     hash: 'hash123',
                 },
                 {
                     trackId: 'audio_es',
-                    type: 'Primary',
+                    type: AudioType.Primary,
                     language: 'es',
                     location: 'path/to/audio_es.mp4',
                     hash: 'hash456',
                 },
                 {
                     trackId: 'audio_commentary',
-                    type: 'Commentary',
+                    type: AudioType.Commentary,
                     language: 'en',
                     location: 'path/to/commentary.mp4',
                     hash: 'hash789',
@@ -125,7 +125,7 @@ describe('MMCBuilder', () => {
             sampleMMCData.audio = [
                 {
                     trackId: 'audio1',
-                    type: 'Primary',
+                    type: AudioType.Primary,
                     language: 'en',
                     location: 'path/to/audio.mp4',
                 },

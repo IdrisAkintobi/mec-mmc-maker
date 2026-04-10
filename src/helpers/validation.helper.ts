@@ -39,6 +39,11 @@ export interface MMCData {
 }
 
 /**
+ * Valid audio types according to MovieLabs specification
+ */
+const VALID_AUDIO_TYPES = ['Primary', 'Narration', 'Dialog Centric', 'Commentary'];
+
+/**
  * Valid MovieLabs ID types
  */
 const VALID_ID_TYPES = [
@@ -407,6 +412,76 @@ export function validateMMCData(data: MMCData): ValidationResult {
         errors.push(...matchResult.errors);
         warnings.push(...matchResult.warnings);
     }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate audio type
+ * @param audioType - Audio type to validate
+ * @returns Validation result
+ *
+ * @example
+ * validateAudioType('Primary')
+ * // { valid: true, errors: [], warnings: [] }
+ *
+ * validateAudioType('Invalid')
+ * // { valid: false, errors: ["Invalid audio type: 'Invalid'. Valid types: Primary, Narration, Dialog Centric, Commentary"], warnings: [] }
+ */
+export function validateAudioType(audioType: string): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!audioType || typeof audioType !== 'string') {
+        return {
+            valid: false,
+            errors: ['Audio type is required and must be a string'],
+            warnings,
+        };
+    }
+
+    // Trim the input
+    const trimmedType = audioType.trim();
+
+    if (!VALID_AUDIO_TYPES.includes(trimmedType)) {
+        errors.push(`Invalid audio type: "${audioType}". Valid types: ${VALID_AUDIO_TYPES.join(', ')}`);
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate audio tracks
+ * @param audioTracks - Array of audio tracks with their types
+ * @returns Validation result
+ */
+export function validateAudioTracks(audioTracks: Array<{ type: string; trackId?: string }>): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!Array.isArray(audioTracks) || audioTracks.length === 0) {
+        return {
+            valid: false,
+            errors: ['At least one audio track is required'],
+            warnings,
+        };
+    }
+
+    audioTracks.forEach((track, index) => {
+        const result = validateAudioType(track.type);
+        if (!result.valid) {
+            const trackIdentifier = track.trackId ? `"${track.trackId}"` : `[${index}]`;
+            errors.push(`Audio track ${trackIdentifier}: ${result.errors.join(', ')}`);
+        }
+    });
 
     return {
         valid: errors.length === 0,

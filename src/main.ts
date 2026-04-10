@@ -12,6 +12,7 @@ export {
     type WorkType,
 } from './types/mec.types';
 export {
+    AudioType,
     type ExperienceType,
     type ImagePurpose,
     type MMCData,
@@ -69,6 +70,8 @@ export {
     validateAspectRatio,
     validateMECData,
     validateMMCData,
+    validateAudioType,
+    validateAudioTracks,
     type ValidationResult,
 } from './helpers/validation.helper';
 export {

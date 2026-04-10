@@ -87,13 +87,13 @@ console.log(mecXml); // <?xml version="1.0" encoding="UTF-8"?>...
 ### Building MMC XML
 
 ```typescript
-import { MMCBuilder, MMCData, ExperienceType, ImagePurpose } from 'mec-mmc-maker';
+import { MMCBuilder, MMCData, AudioType, ExperienceType, ImagePurpose } from 'mec-mmc-maker';
 
 const mmcData: MMCData = {
     audio: [
         {
             trackId: 'audio1',
-            type: 'Primary',
+            type: AudioType.Primary,
             language: 'en',
             location: 'path/to/audio.mp4',
             hash: 'abc123',
@@ -144,12 +144,63 @@ const mmcXml = MMCBuilder.build(mmcData);
 ### XML Validation
 
 ```typescript
-import { validateXMLStructure } from 'mec-mmc-maker';
+import { validateXMLStructure, validateAudioType, validateAudioTracks } from 'mec-mmc-maker';
 
 const isValid = validateXMLStructure(xmlString);
 if (isValid) {
     console.log('XML is valid!');
 }
+
+// Validate a single audio type
+const audioTypeResult = validateAudioType('Primary');
+if (audioTypeResult.valid) {
+    console.log('Audio type is valid!');
+}
+
+// Validate multiple audio tracks
+const audioTracksResult = validateAudioTracks([
+    { type: 'Primary', trackId: 'audio1' },
+    { type: 'Commentary', trackId: 'audio2' },
+]);
+if (audioTracksResult.valid) {
+    console.log('All audio tracks are valid!');
+}
+```
+
+### Supported Audio Types
+
+According to the MovieLabs specification, the following audio types are supported:
+
+- **`AudioType.Primary`** (`'Primary'`) - Standard audio mix
+- **`AudioType.Narration`** (`'Narration'`) - Descriptive Audio tracks (for visually impaired)
+- **`AudioType.DialogCentric`** (`'Dialog Centric'`) - Audio mix emphasizing dialog
+- **`AudioType.Commentary`** (`'Commentary'`) - Commentary audio track (e.g., director's commentary)
+
+Example usage:
+
+```typescript
+import { AudioType } from 'mec-mmc-maker';
+
+const audio = [
+    {
+        trackId: 'audio_en',
+        type: AudioType.Primary,
+        language: 'en',
+        location: 'path/to/audio.mp4',
+    },
+    {
+        trackId: 'audio_narration',
+        type: AudioType.Narration,
+        language: 'en',
+        location: 'path/to/narration.mp4',
+    },
+    {
+        trackId: 'audio_commentary',
+        type: AudioType.Commentary,
+        language: 'en',
+        location: 'path/to/commentary.mp4',
+    },
+];
 ```
 
 ## API Documentation
@@ -158,16 +209,33 @@ All interfaces and methods include comprehensive JSDoc comments. Your IDE will p
 
 ### Key Interfaces
 
--   **`MECData`**: Complete metadata structure for MEC XML
--   **`MMCData`**: Complete manifest structure for MMC XML
--   **`LocalizedInfo`**: Language-specific metadata
--   **`Genre`**: Genre classification (max 3 total)
--   **`CastMember`**: Cast and crew information
+- **`MECData`**: Complete metadata structure for MEC XML
+- **`MMCData`**: Complete manifest structure for MMC XML
+- **`LocalizedInfo`**: Language-specific metadata
+- **`Genre`**: Genre classification (max 3 total)
+- **`CastMember`**: Cast and crew information
+
+### Enums
+
+- **`AudioType`**: Valid audio types (`Primary`, `Narration`, `Dialog Centric`, `Commentary`)
+- **`ExperienceType`**: Experience types (`Movie`, `Series`, `Season`, `Episode`)
+- **`ImagePurpose`**: Image purposes (`Boxart`, `Cover`, `Hero`)
+- **`WorkType`**: Work types for MEC content
+- **`ReleaseType`**: Release types (e.g., `Theatrical`, `DVD`)
+- **`NamespaceType`**: Identifier namespaces (e.g., `EIDR`, `ISAN`)
 
 ### Builder Classes
 
--   **`MECBuilder.build(data: MECData): string`**: Generates MEC XML
--   **`MMCBuilder.build(data: MMCData): string`**: Generates MMC XML
+- **`MECBuilder.build(data: MECData): string`**: Generates MEC XML
+- **`MMCBuilder.build(data: MMCData): string`**: Generates MMC XML
+
+### Validation Functions
+
+- **`validateXMLStructure(xml: string): boolean`**: Validates XML structure
+- **`validateAudioType(audioType: string): ValidationResult`**: Validates a single audio type
+- **`validateAudioTracks(tracks: AudioTrack[]): ValidationResult`**: Validates multiple audio tracks
+- **`validateMovieLabsID(id: string): ValidationResult`**: Validates MovieLabs ID format
+- **`validateAspectRatio(ratio: string): ValidationResult`**: Validates aspect ratio format
 
 ## Migration from mdmec-xml-maker
 
@@ -175,10 +243,10 @@ If you're migrating from the old `mdmec-xml-maker` library, see our [Migration G
 
 **Key Changes:**
 
--   Object structures instead of semicolon-delimited strings
--   camelCase property names instead of PascalCase
--   Builder classes instead of function exports
--   Strong TypeScript types with full IntelliSense
+- Object structures instead of semicolon-delimited strings
+- camelCase property names instead of PascalCase
+- Builder classes instead of function exports
+- Strong TypeScript types with full IntelliSense
 
 ## Examples
 
@@ -206,17 +274,17 @@ MIT Licensed. See [LICENSE](./LICENSE) file for details.
 
 This library generates XML files compliant with:
 
--   MovieLabs MEC (Media Entertainment Core) v2.9
--   MovieLabs MMC (Media Manifest Core) v1.9
+- MovieLabs MEC (Media Entertainment Core) v2.9
+- MovieLabs MMC (Media Manifest Core) v1.9
 
 ### Documentation Resources
 
--   [MovieLabs Specifications](http://www.movielabs.com/md/)
--   [Amazon Prime Video - MEC Title Metadata Guide](https://videocentral.amazon.com/support/delivery-experience/mec-title-meta-data)
--   [Amazon Prime Video - MMC Asset Manifest Guide](https://videocentral.amazon.com/support/delivery-experience/mmc-asset-manifest)
--   [Amazon Prime Video - Metadata Overview](https://videocentral.amazon.com/support/delivery-experience/metadata-guide)
--   [Amazon Prime Video Content Delivery](https://videodirect.amazon.com/)
+- [MovieLabs Specifications](http://www.movielabs.com/md/)
+- [Amazon Prime Video - MEC Title Metadata Guide](https://videocentral.amazon.com/support/delivery-experience/mec-title-meta-data)
+- [Amazon Prime Video - MMC Asset Manifest Guide](https://videocentral.amazon.com/support/delivery-experience/mmc-asset-manifest)
+- [Amazon Prime Video - Metadata Overview](https://videocentral.amazon.com/support/delivery-experience/metadata-guide)
+- [Amazon Prime Video Content Delivery](https://videodirect.amazon.com/)
 
 ## Related
 
--   [mec-xml-formatter](https://github.com/Wi-flx/mec-mmc-formatter) - REST API service using this library
+- [mec-xml-formatter](https://github.com/Wi-flx/mec-mmc-formatter) - REST API service using this library

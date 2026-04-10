@@ -1,10 +1,10 @@
-import { ExperienceType, ImagePurpose } from '../../src/types/mmc.types';
+import { AudioType, ExperienceType, ImagePurpose } from '../../src/types/mmc.types';
 
 export const sampleMMCData = {
     audio: [
         {
             trackId: 'audio1',
-            type: 'Primary',
+            type: AudioType.Primary,
             language: 'en',
             location: 'path/to/audio.mp4',
             hash: 'abc123',

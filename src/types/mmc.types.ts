@@ -36,7 +36,7 @@ export interface MMCData {
 export interface AudioTrack {
     /** Track ID - OPTIONAL: Will be auto-generated if not provided */
     trackId?: string;
-    type: string;
+    type: AudioType | string;
     language: string;
     location: string;
     /** MD5 hash - OPTIONAL: Not all content providers have hashes */
@@ -133,6 +133,13 @@ export enum ImagePurpose {
     Boxart = 'Boxart',
     Cover = 'Cover',
     Hero = 'Hero',
+}
+
+export enum AudioType {
+    Primary = 'Primary',
+    Narration = 'Narration',
+    DialogCentric = 'Dialog Centric',
+    Commentary = 'Commentary',
 }
 
 export enum ExperienceType {
