@@ -1,6 +1,6 @@
 import { MMCBuilder } from '../src/builders/mmc.builder';
 import { validateXMLStructure } from '../src/helpers/xml-validator';
-import { AudioType, ExperienceType, MMCData } from '../src/types/mmc.types';
+import { AudioType, ExperienceType, MMCData, SubtitleType, VideoType } from '../src/types/mmc.types';
 import { sampleMMCData as sampleData } from './sample-data/mmc-sample';
 
 describe('MMCBuilder', () => {
@@ -42,7 +42,7 @@ describe('MMCBuilder', () => {
 
             // Audio checks
             expect(xml).toContain('AudioTrackID="audio1"');
-            expect(xml).toContain('<md:Type>Primary</md:Type>');
+            expect(xml).toContain('<md:Type>primary</md:Type>');
             expect(xml).toContain('<manifest:ContainerLocation>path/to/audio.mp4</manifest:ContainerLocation>');
 
             // Video checks
@@ -118,7 +118,7 @@ describe('MMCBuilder', () => {
             expect(xml).toContain('audio_en');
             expect(xml).toContain('audio_es');
             expect(xml).toContain('audio_commentary');
-            expect(xml).toContain('Commentary');
+            expect(xml).toContain('commentary');
         });
 
         it('should handle audio tracks without optional hash', () => {
@@ -141,7 +141,7 @@ describe('MMCBuilder', () => {
             sampleMMCData.video = [
                 {
                     trackId: 'video_hd',
-                    type: 'Primary',
+                    type: VideoType.Primary,
                     language: 'en',
                     location: 'path/to/video_hd.mp4',
                     hash: 'hash123',
@@ -154,7 +154,7 @@ describe('MMCBuilder', () => {
                 },
                 {
                     trackId: 'video_sd',
-                    type: 'Primary',
+                    type: VideoType.Primary,
                     language: 'en',
                     location: 'path/to/video_sd.mp4',
                     hash: 'hash456',
@@ -180,7 +180,7 @@ describe('MMCBuilder', () => {
             sampleMMCData.subtitle = [
                 {
                     trackId: 'sub_en_cc',
-                    type: 'ClosedCaption',
+                    type: SubtitleType.SDH,
                     language: 'en',
                     location: 'path/to/cc_en.srt',
                     hash: 'hash123',
@@ -190,7 +190,7 @@ describe('MMCBuilder', () => {
                 },
                 {
                     trackId: 'sub_es',
-                    type: 'Normal',
+                    type: SubtitleType.Normal,
                     language: 'es',
                     location: 'path/to/sub_es.srt',
                     hash: 'hash456',
@@ -201,8 +201,8 @@ describe('MMCBuilder', () => {
             ];
 
             const xml = MMCBuilder.build(sampleMMCData);
-            expect(xml).toContain('ClosedCaption');
-            expect(xml).toContain('Normal');
+            expect(xml).toContain('sdh');
+            expect(xml).toContain('normal');
             expect(xml).toContain('sub_en_cc');
             expect(xml).toContain('sub_es');
         });
@@ -258,6 +258,92 @@ describe('MMCBuilder', () => {
             expect(xml).toContain('trailer');
             expect(xml).toContain('behind_scenes');
             expect(xml).toContain('BehindTheScenes');
+        });
+    });
+
+    describe('Audio Type Validation', () => {
+        it('should throw error for invalid audio type', () => {
+            sampleMMCData.audio = [
+                {
+                    trackId: 'audio1',
+                    type: 'InvalidType',
+                    language: 'en',
+                    location: 'path/to/audio.mp4',
+                },
+            ];
+
+            expect(() => MMCBuilder.build(sampleMMCData)).toThrow(
+                'Audio validation failed: Audio track "audio1": Invalid audio type: "InvalidType". Valid types: primary, narration, dialog centric, commentary',
+            );
+        });
+
+        it('should throw error for multiple invalid audio types', () => {
+            sampleMMCData.audio = [
+                {
+                    trackId: 'audio1',
+                    type: 'InvalidType1',
+                    language: 'en',
+                    location: 'path/to/audio1.mp4',
+                },
+                {
+                    trackId: 'audio2',
+                    type: 'InvalidType2',
+                    language: 'es',
+                    location: 'path/to/audio2.mp4',
+                },
+            ];
+
+            expect(() => MMCBuilder.build(sampleMMCData)).toThrow('Audio validation failed');
+        });
+
+        it('should accept valid audio types', () => {
+            sampleMMCData.audio = [
+                {
+                    trackId: 'audio1',
+                    type: AudioType.Primary,
+                    language: 'en',
+                    location: 'path/to/audio.mp4',
+                },
+                {
+                    trackId: 'audio2',
+                    type: AudioType.Narration,
+                    language: 'en',
+                    location: 'path/to/narration.mp4',
+                },
+                {
+                    trackId: 'audio3',
+                    type: AudioType.Commentary,
+                    language: 'en',
+                    location: 'path/to/commentary.mp4',
+                },
+                {
+                    trackId: 'audio4',
+                    type: AudioType.DialogCentric,
+                    language: 'en',
+                    location: 'path/to/dialog.mp4',
+                },
+            ];
+
+            expect(() => MMCBuilder.build(sampleMMCData)).not.toThrow();
+        });
+
+        it('should accept valid audio types as strings', () => {
+            sampleMMCData.audio = [
+                {
+                    trackId: 'audio1',
+                    type: 'Primary',
+                    language: 'en',
+                    location: 'path/to/audio.mp4',
+                },
+                {
+                    trackId: 'audio2',
+                    type: 'Narration',
+                    language: 'en',
+                    location: 'path/to/narration.mp4',
+                },
+            ];
+
+            expect(() => MMCBuilder.build(sampleMMCData)).not.toThrow();
         });
     });
 });

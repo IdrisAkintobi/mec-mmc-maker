@@ -93,7 +93,7 @@ const mmcData: MMCData = {
     audio: [
         {
             trackId: 'audio1',
-            type: AudioType.Primary,
+            type: AudioType.Primary, // ✅ Valid audio type
             language: 'en',
             location: 'path/to/audio.mp4',
             hash: 'abc123',
@@ -139,13 +139,54 @@ const mmcData: MMCData = {
 };
 
 const mmcXml = MMCBuilder.build(mmcData);
+
+// Note: MMCBuilder.build() automatically validates audio types
+// and throws an error if any invalid types are detected
+```
+
+### Automatic Audio Type Validation
+
+The `MMCBuilder.build()` method automatically validates all audio types before generating XML. If an invalid audio type is detected, it will throw an error:
+
+```typescript
+import { MMCBuilder, AudioType } from 'mec-mmc-maker';
+
+const mmcData = {
+    audio: [
+        {
+            trackId: 'audio1',
+            type: 'InvalidType', // ❌ Invalid audio type
+            language: 'en',
+            location: 'path/to/audio.mp4',
+        },
+    ],
+    // ... rest of data
+};
+
+try {
+    const xml = MMCBuilder.build(mmcData);
+} catch (error) {
+    console.error(error.message);
+    // Output: "Audio validation failed: Audio track "audio1": Invalid audio type: "InvalidType". Valid types: Primary, Narration, Dialog Centric, Commentary"
+}
 ```
 
 ### XML Validation
 
+The library provides both automatic and manual validation options.
+
+#### Automatic Validation
+
+`MMCBuilder.build()` automatically validates audio types before building XML. Invalid audio types will throw an error immediately.
+
+#### Manual Validation
+
+For more granular control, you can manually validate before building:
+
 ```typescript
 import { validateXMLStructure, validateAudioType, validateAudioTracks } from 'mec-mmc-maker';
 
+// Validate XML structure
 const isValid = validateXMLStructure(xmlString);
 if (isValid) {
     console.log('XML is valid!');
@@ -153,8 +194,8 @@ if (isValid) {
 
 // Validate a single audio type
 const audioTypeResult = validateAudioType('Primary');
-if (audioTypeResult.valid) {
-    console.log('Audio type is valid!');
+if (!audioTypeResult.valid) {
+    console.error(audioTypeResult.errors);
 }
 
 // Validate multiple audio tracks
@@ -162,8 +203,8 @@ const audioTracksResult = validateAudioTracks([
     { type: 'Primary', trackId: 'audio1' },
     { type: 'Commentary', trackId: 'audio2' },
 ]);
-if (audioTracksResult.valid) {
-    console.log('All audio tracks are valid!');
+if (!audioTracksResult.valid) {
+    console.error(audioTracksResult.errors);
 }
 ```
 
@@ -175,6 +216,8 @@ According to the MovieLabs specification, the following audio types are supporte
 - **`AudioType.Narration`** (`'Narration'`) - Descriptive Audio tracks (for visually impaired)
 - **`AudioType.DialogCentric`** (`'Dialog Centric'`) - Audio mix emphasizing dialog
 - **`AudioType.Commentary`** (`'Commentary'`) - Commentary audio track (e.g., director's commentary)
+
+**Note:** Both the direct `MMCBuilder.build()` and CSV processor `dataToMMCXml()` automatically validate audio types and will **throw an error** if invalid types are detected.
 
 Example usage:
 

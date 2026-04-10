@@ -1,5 +1,6 @@
 // Ported from mdmec-xml-maker, type definitions need reconciliation
 import { calculateAspectRatio } from '../helpers/aspect-ratio.helper';
+import { validateAudioType, validateSubtitleType, validateVideoType } from '../helpers/validation.helper';
 import { MMCCSVData } from '../types/csv/mmc-parsed.type';
 import {
     manifestALIDExperienceMap,
@@ -262,6 +263,21 @@ export class MMCMapper {
             );
         }
 
+        // Validate subtitle types (defense-in-depth)
+        const errors: string[] = [];
+        types.forEach((type, index) => {
+            const trimmedType = type.trim();
+            const validationResult = validateSubtitleType(trimmedType);
+            if (!validationResult.valid) {
+                const trackId = subtitleIDs[index] ? `"${subtitleIDs[index].trim()}"` : `[${index}]`;
+                errors.push(`Subtitle track ${trackId}: ${validationResult.errors.join(', ')}`);
+            }
+        });
+
+        if (errors.length > 0) {
+            throw new Error(`Subtitle validation failed: ${errors.join('; ')}`);
+        }
+
         const manifestSubtitles = [];
 
         for (let i = 0; i < subtitleIDs.length; i++) {
@@ -331,6 +347,21 @@ export class MMCMapper {
             throw new Error('AudioTrackID, AudioType, AudioLanguage, and AudioLocation must have the same length');
         }
 
+        // Validate audio types (defense-in-depth)
+        const errors: string[] = [];
+        types.forEach((type, index) => {
+            const trimmedType = type.trim();
+            const validationResult = validateAudioType(trimmedType);
+            if (!validationResult.valid) {
+                const trackId = trackIDs[index] ? `"${trackIDs[index].trim()}"` : `[${index}]`;
+                errors.push(`Audio track ${trackId}: ${validationResult.errors.join(', ')}`);
+            }
+        });
+
+        if (errors.length > 0) {
+            throw new Error(`Audio validation failed: ${errors.join('; ')}`);
+        }
+
         const manifestAudios = [];
 
         for (let i = 0; i < trackIDs.length; i++) {
@@ -392,6 +423,21 @@ export class MMCMapper {
         if (heightPx.length !== widthPx.length) {
             console.log({ heightPx, widthPx });
             throw new Error('HeightPixels and WidthPixels must have the same length');
+        }
+
+        // Validate video types (defense-in-depth)
+        const errors: string[] = [];
+        types.forEach((type, index) => {
+            const trimmedType = type.trim();
+            const validationResult = validateVideoType(trimmedType);
+            if (!validationResult.valid) {
+                const trackId = trackIDs[index] ? `"${trackIDs[index].trim()}"` : `[${index}]`;
+                errors.push(`Video track ${trackId}: ${validationResult.errors.join(', ')}`);
+            }
+        });
+
+        if (errors.length > 0) {
+            throw new Error(`Video validation failed: ${errors.join('; ')}`);
         }
 
         const manifestVideos = [];

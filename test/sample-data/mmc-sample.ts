@@ -1,4 +1,4 @@
-import { AudioType, ExperienceType, ImagePurpose } from '../../src/types/mmc.types';
+import { AudioType, ExperienceType, ImagePurpose, VideoType } from '../../src/types/mmc.types';
 
 export const sampleMMCData = {
     audio: [
@@ -13,7 +13,7 @@ export const sampleMMCData = {
     video: [
         {
             trackId: 'video1',
-            type: 'Primary',
+            type: VideoType.Primary,
             language: 'en',
             location: 'path/to/video.mp4',
             hash: 'def456',

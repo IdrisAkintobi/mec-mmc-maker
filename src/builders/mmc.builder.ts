@@ -1,9 +1,33 @@
 import { calculateAspectRatio } from '../helpers/aspect-ratio.helper';
+import { validateAudioTracks, validateSubtitleTracks, validateVideoTracks } from '../helpers/validation.helper';
 import { XML_PREFIX, xmlBuilder } from '../infrastructure/xml.builder';
 import { MMCData } from '../types/mmc.types';
 
 export class MMCBuilder {
     static build(data: MMCData): string {
+        // Validate video types before building
+        if (data.video && data.video.length > 0) {
+            const validationResult = validateVideoTracks(data.video);
+            if (!validationResult.valid) {
+                throw new Error(`Video validation failed: ${validationResult.errors.join('; ')}`);
+            }
+        }
+
+        // Validate audio types before building
+        if (data.audio && data.audio.length > 0) {
+            const validationResult = validateAudioTracks(data.audio);
+            if (!validationResult.valid) {
+                throw new Error(`Audio validation failed: ${validationResult.errors.join('; ')}`);
+            }
+        }
+
+        // Validate subtitle types before building
+        if (data.subtitle && data.subtitle.length > 0) {
+            const validationResult = validateSubtitleTracks(data.subtitle);
+            if (!validationResult.valid) {
+                throw new Error(`Subtitle validation failed: ${validationResult.errors.join('; ')}`);
+            }
+        }
         const xmlObj = {
             'manifest:MediaManifest': {
                 '@xmlns:manifest': 'http://www.movielabs.com/schema/manifest/v1.9/manifest',

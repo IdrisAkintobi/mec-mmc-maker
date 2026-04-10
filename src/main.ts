@@ -13,6 +13,8 @@ export {
 } from './types/mec.types';
 export {
     AudioType,
+    SubtitleType,
+    VideoType,
     type ExperienceType,
     type ImagePurpose,
     type MMCData,
@@ -72,6 +74,10 @@ export {
     validateMMCData,
     validateAudioType,
     validateAudioTracks,
+    validateVideoType,
+    validateVideoTracks,
+    validateSubtitleType,
+    validateSubtitleTracks,
     type ValidationResult,
 } from './helpers/validation.helper';
 export {

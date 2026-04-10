@@ -46,7 +46,7 @@ export interface AudioTrack {
 export interface VideoTrack {
     /** Track ID - OPTIONAL: Will be auto-generated if not provided */
     trackId?: string;
-    type: string;
+    type: VideoType | string;
     language: string;
     location: string;
     /** MD5 hash - OPTIONAL: Not all content providers have hashes */
@@ -64,7 +64,7 @@ export interface VideoTrack {
 export interface SubtitleTrack {
     /** Track ID - OPTIONAL: Will be auto-generated if not provided */
     trackId?: string;
-    type: string;
+    type: SubtitleType | string;
     language: string;
     location: string;
     /** MD5 hash - OPTIONAL: Not all content providers have hashes */
@@ -136,10 +136,21 @@ export enum ImagePurpose {
 }
 
 export enum AudioType {
-    Primary = 'Primary',
-    Narration = 'Narration',
-    DialogCentric = 'Dialog Centric',
-    Commentary = 'Commentary',
+    Primary = 'primary',
+    Narration = 'narration',
+    DialogCentric = 'dialog centric',
+    Commentary = 'commentary',
+}
+
+export enum VideoType {
+    Primary = 'primary',
+    Other = 'other',
+}
+
+export enum SubtitleType {
+    Normal = 'normal',
+    SDH = 'sdh',
+    Forced = 'forced',
 }
 
 export enum ExperienceType {

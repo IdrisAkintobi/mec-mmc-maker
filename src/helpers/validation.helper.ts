@@ -39,9 +39,19 @@ export interface MMCData {
 }
 
 /**
- * Valid audio types according to MovieLabs specification
+ * Valid audio types according to MovieLabs specification (lowercase for case-insensitive comparison)
  */
-const VALID_AUDIO_TYPES = ['Primary', 'Narration', 'Dialog Centric', 'Commentary'];
+const VALID_AUDIO_TYPES = ['primary', 'narration', 'dialog centric', 'commentary'];
+
+/**
+ * Valid video types according to MovieLabs specification (lowercase for case-insensitive comparison)
+ */
+const VALID_VIDEO_TYPES = ['primary', 'other'];
+
+/**
+ * Valid subtitle types according to MovieLabs specification (lowercase for case-insensitive comparison)
+ */
+const VALID_SUBTITLE_TYPES = ['normal', 'sdh', 'forced'];
 
 /**
  * Valid MovieLabs ID types
@@ -430,7 +440,7 @@ export function validateMMCData(data: MMCData): ValidationResult {
  * // { valid: true, errors: [], warnings: [] }
  *
  * validateAudioType('Invalid')
- * // { valid: false, errors: ["Invalid audio type: 'Invalid'. Valid types: Primary, Narration, Dialog Centric, Commentary"], warnings: [] }
+ * // { valid: false, errors: ["Invalid audio type: 'Invalid'. Valid types: primary, narration, dialog centric, commentary"], warnings: [] }
  */
 export function validateAudioType(audioType: string): ValidationResult {
     const errors: string[] = [];
@@ -444,10 +454,10 @@ export function validateAudioType(audioType: string): ValidationResult {
         };
     }
 
-    // Trim the input
-    const trimmedType = audioType.trim();
+    // Trim and convert to lowercase for case-insensitive comparison
+    const normalizedType = audioType.trim().toLowerCase();
 
-    if (!VALID_AUDIO_TYPES.includes(trimmedType)) {
+    if (!VALID_AUDIO_TYPES.includes(normalizedType)) {
         errors.push(`Invalid audio type: "${audioType}". Valid types: ${VALID_AUDIO_TYPES.join(', ')}`);
     }
 
@@ -480,6 +490,146 @@ export function validateAudioTracks(audioTracks: Array<{ type: string; trackId?:
         if (!result.valid) {
             const trackIdentifier = track.trackId ? `"${track.trackId}"` : `[${index}]`;
             errors.push(`Audio track ${trackIdentifier}: ${result.errors.join(', ')}`);
+        }
+    });
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate video type
+ * @param videoType - Video type to validate
+ * @returns Validation result
+ *
+ * @example
+ * validateVideoType('Primary')
+ * // { valid: true, errors: [], warnings: [] }
+ *
+ * validateVideoType('Invalid')
+ * // { valid: false, errors: ["Invalid video type: 'Invalid'. Valid types: primary, other"], warnings: [] }
+ */
+export function validateVideoType(videoType: string): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!videoType || typeof videoType !== 'string') {
+        return {
+            valid: false,
+            errors: ['Video type is required and must be a string'],
+            warnings,
+        };
+    }
+
+    // Trim and convert to lowercase for case-insensitive comparison
+    const normalizedType = videoType.trim().toLowerCase();
+
+    if (!VALID_VIDEO_TYPES.includes(normalizedType)) {
+        errors.push(`Invalid video type: "${videoType}". Valid types: ${VALID_VIDEO_TYPES.join(', ')}`);
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate video tracks
+ * @param videoTracks - Array of video tracks with their types
+ * @returns Validation result
+ */
+export function validateVideoTracks(videoTracks: Array<{ type: string; trackId?: string }>): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!Array.isArray(videoTracks) || videoTracks.length === 0) {
+        return {
+            valid: false,
+            errors: ['At least one video track is required'],
+            warnings,
+        };
+    }
+
+    videoTracks.forEach((track, index) => {
+        const result = validateVideoType(track.type);
+        if (!result.valid) {
+            const trackIdentifier = track.trackId ? `"${track.trackId}"` : `[${index}]`;
+            errors.push(`Video track ${trackIdentifier}: ${result.errors.join(', ')}`);
+        }
+    });
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate subtitle type
+ * @param subtitleType - Subtitle type to validate
+ * @returns Validation result
+ *
+ * @example
+ * validateSubtitleType('Normal')
+ * // { valid: true, errors: [], warnings: [] }
+ *
+ * validateSubtitleType('Invalid')
+ * // { valid: false, errors: ["Invalid subtitle type: 'Invalid'. Valid types: normal, sdh, forced"], warnings: [] }
+ */
+export function validateSubtitleType(subtitleType: string): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!subtitleType || typeof subtitleType !== 'string') {
+        return {
+            valid: false,
+            errors: ['Subtitle type is required and must be a string'],
+            warnings,
+        };
+    }
+
+    // Trim and convert to lowercase for case-insensitive comparison
+    const normalizedType = subtitleType.trim().toLowerCase();
+
+    if (!VALID_SUBTITLE_TYPES.includes(normalizedType)) {
+        errors.push(`Invalid subtitle type: "${subtitleType}". Valid types: ${VALID_SUBTITLE_TYPES.join(', ')}`);
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+    };
+}
+
+/**
+ * Validate subtitle tracks
+ * @param subtitleTracks - Array of subtitle tracks with their types
+ * @returns Validation result
+ */
+export function validateSubtitleTracks(subtitleTracks: Array<{ type: string; trackId?: string }>): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    if (!Array.isArray(subtitleTracks) || subtitleTracks.length === 0) {
+        return {
+            valid: true, // Subtitles are optional
+            errors,
+            warnings,
+        };
+    }
+
+    subtitleTracks.forEach((track, index) => {
+        const result = validateSubtitleType(track.type);
+        if (!result.valid) {
+            const trackIdentifier = track.trackId ? `"${track.trackId}"` : `[${index}]`;
+            errors.push(`Subtitle track ${trackIdentifier}: ${result.errors.join(', ')}`);
         }
     });
 
