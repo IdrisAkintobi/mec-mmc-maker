@@ -286,7 +286,7 @@ If you're migrating from the old `mdmec-xml-maker` library, see our [Migration G
 
 **Key Changes:**
 
-- Object structures instead of semicolon-delimited strings
+- Object structures instead of pipe-delimited strings
 - camelCase property names instead of PascalCase
 - Builder classes instead of function exports
 - Strong TypeScript types with full IntelliSense

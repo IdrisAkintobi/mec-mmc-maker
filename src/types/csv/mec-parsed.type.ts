@@ -39,7 +39,7 @@ export type MECCSVData = {
      * These must be of the same length
      * E,g en-US;en-GB, title01;title02 ...
      */
-    //LocalizedInfo - [Array] - separator(';')
+    //LocalizedInfo - [Array] - separator('|')
     'LocalizedInfo:language': string;
     TitleDisplay: string;
     Summary190: string;
@@ -49,12 +49,12 @@ export type MECCSVData = {
      * These must be of the same length
      * E,g ArtReference01;ArtReference02, 4:3;6:9, cover;hero
      */
-    //ArtReference - [Array] - separator(';')
+    //ArtReference - [Array] - separator('|')
     ArtReference: string;
     'ArtReference:resolution': string;
     'ArtReference:purpose': string;
 
-    //LocalizedInfo - [Array] - separator(';') //Additional subGenre are separated using '||'
+    //LocalizedInfo - [Array] - separator('|') //Additional subGenre are separated using '||'
     Genre: string;
 
     ReleaseYear: string;
@@ -65,7 +65,7 @@ export type MECCSVData = {
      * E,g Theatre;Cinema, Nigeria;Ghana, 11-11-2001;11-11-2000
      * @optional If not provided, only ReleaseDate will be used
      */
-    //ReleaseHistory - [Array] - separator(';')
+    //ReleaseHistory - [Array] - separator('|')
     'ReleaseHistory:Type'?: string;
     'ReleaseHistory:Country'?: string;
     'ReleaseHistory:Date'?: string;
@@ -77,7 +77,7 @@ export type MECCSVData = {
      * E,g Amazon, movie001
      * @optional Will default to ORG namespace with ContentID-derived identifier
      */
-    //Identifier - [Array] - separator(';')
+    //Identifier - [Array] - separator('|')
     'Identifier:Namespace'?: string;
     Identifier?: string;
 
@@ -89,7 +89,7 @@ export type MECCSVData = {
      * E,g US;NG, MPAA;NFVB, PG-13;18
      * @optional Only required if Rating is "Yes"
      */
-    //Rating - [Array] - separator(';')
+    //Rating - [Array] - separator('|')
     'Rating:Country'?: string;
     'Rating:System'?: string;
     'Rating:Value'?: string;
@@ -100,7 +100,7 @@ export type MECCSVData = {
      * the number of Cast:DisplayName:OtherLanguages will be the length of Cast:DisplayName:language - 1 (which is the default en-US)
      * @optional Can be omitted if cast information is not available
      */
-    //People - [Array] - separator(';')
+    //People - [Array] - separator('|')
     'Cast:JobFunction'?: string;
     'Cast:BillingBlockOrder'?: string;
     'Cast:DisplayName:language'?: string;

@@ -35,9 +35,9 @@ export class ImageOnlyMapper {
     }
 
     private static mapArtReference(data: ImageOnlyCSVData): MdArtReference[] {
-        const reference = data['ArtReference'].split(';');
-        const resolution = data['ArtReference:resolution'].split(';');
-        const purpose = data['ArtReference:purpose'].split(';');
+        const reference = data['ArtReference'].split('|');
+        const resolution = data['ArtReference:resolution'].split('|');
+        const purpose = data['ArtReference:purpose'].split('|');
 
         // check if all arrays have the same length
         if (reference.length !== resolution.length || reference.length !== purpose.length) {
@@ -61,13 +61,13 @@ export class ImageOnlyMapper {
     }
 
     private static mapLocalizedInfo(data: ImageOnlyCSVData): MdLocalizedInfo[] {
-        const languages = data['LocalizedInfo:language'].split(';');
+        const languages = data['LocalizedInfo:language'].split('|');
 
         const localizedInfo = [];
 
-        for (let i = 0; i < languages.length; i++) {
+        for (const language of languages) {
             localizedInfo.push({
-                '@language': languages[i],
+                '@language': language,
                 ['md:ArtReference']: this.mapArtReference(data),
             });
         }
@@ -76,8 +76,8 @@ export class ImageOnlyMapper {
     }
 
     private static mapAltIdentifier(data: ImageOnlyCSVData): MdAltIdentifier[] {
-        const namespace = data['Identifier:Namespace'].split(';');
-        const identifier = data['Identifier'].split(';');
+        const namespace = data['Identifier:Namespace'].split('|');
+        const identifier = data['Identifier'].split('|');
 
         // check if all arrays have the same length
         if (namespace.length !== identifier.length) {

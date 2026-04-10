@@ -110,9 +110,9 @@ export class MECMapper {
     }
 
     private static mapArtReference(data: MECCSVData): MdArtReference[] {
-        const reference = data['ArtReference'].split(';');
-        const resolution = data['ArtReference:resolution'].split(';');
-        const purpose = data['ArtReference:purpose'].split(';');
+        const reference = data['ArtReference'].split('|');
+        const resolution = data['ArtReference:resolution'].split('|');
+        const purpose = data['ArtReference:purpose'].split('|');
 
         // check if all arrays have the same length
         if (reference.length !== resolution.length || reference.length !== purpose.length) {
@@ -140,8 +140,8 @@ export class MECMapper {
             throw new Error('Genre can not be empty');
         }
         const [allGenres, allSubGenres] = data['Genre'].split('||');
-        const genres = allGenres.split(';');
-        const subGenres = allSubGenres?.split(';');
+        const genres = allGenres.split('|');
+        const subGenres = allSubGenres?.split('|');
 
         const genreArray = [];
         let genreCount = 0;
@@ -166,14 +166,14 @@ export class MECMapper {
     }
 
     private static mapLocalizedInfo(data: MECCSVData): MdLocalizedInfo[] {
-        const languages = data['LocalizedInfo:language'].split(';');
-        const titleDisplay = data['TitleDisplay'].split(';');
+        const languages = data['LocalizedInfo:language'].split('|');
+        const titleDisplay = data['TitleDisplay'].split('|');
 
         // Auto-generate TitleSort from TitleDisplay
         const titleSort = titleDisplay.map((title: string) => generateTitleSort(title));
 
-        const summary400 = data['Summary400'].split(';');
-        const summary190 = data['Summary190'].split(';');
+        const summary400 = data['Summary400'].split('|');
+        const summary190 = data['Summary190'].split('|');
 
         // check if all arrays have the same length
         if (languages.length !== titleDisplay.length || languages.length !== summary400.length) {
@@ -229,9 +229,9 @@ export class MECMapper {
             ];
         }
 
-        const releaseType = data['ReleaseHistory:Type'].split(';');
-        const country = data['ReleaseHistory:Country'].split(';');
-        const date = data['ReleaseHistory:Date'].split(';');
+        const releaseType = data['ReleaseHistory:Type'].split('|');
+        const country = data['ReleaseHistory:Country'].split('|');
+        const date = data['ReleaseHistory:Date'].split('|');
 
         // check if all arrays have the same length
         if (releaseType.length !== country.length || releaseType.length !== date.length) {
@@ -271,8 +271,8 @@ export class MECMapper {
             ];
         }
 
-        const namespace = data['Identifier:Namespace'].split(';');
-        const identifier = data['Identifier'].split(';');
+        const namespace = data['Identifier:Namespace'].split('|');
+        const identifier = data['Identifier'].split('|');
 
         // check if all arrays have the same length
         if (namespace.length !== identifier.length) {
@@ -298,9 +298,9 @@ export class MECMapper {
             throw new Error('When Rating is "Yes", Rating:Country, Rating:System, and Rating:Value are required');
         }
 
-        const country = data['Rating:Country'].split(';');
-        const system = data['Rating:System'].split(';');
-        const value = data['Rating:Value'].split(';');
+        const country = data['Rating:Country'].split('|');
+        const system = data['Rating:System'].split('|');
+        const value = data['Rating:Value'].split('|');
 
         // check if all arrays have the same length
         if (country.length !== system.length || country.length !== value.length) {
@@ -347,10 +347,10 @@ export class MECMapper {
             return [];
         }
 
-        const displayNameLanguages = data['Cast:DisplayName:language'].split(';');
+        const displayNameLanguages = data['Cast:DisplayName:language'].split('|');
         const displayNames = data['Cast:DisplayName'].split('||');
-        const jobFunction = data['Cast:JobFunction'].split(';');
-        const billingBlockOrder = data['Cast:BillingBlockOrder'].split(';');
+        const jobFunction = data['Cast:JobFunction'].split('|');
+        const billingBlockOrder = data['Cast:BillingBlockOrder'].split('|');
 
         if (displayNameLanguages.length !== displayNames.length) {
             console.log({ displayNameLanguages, displayNames });
@@ -365,7 +365,7 @@ export class MECMapper {
 
         const displayNameObj: Record<string, string[]> = displayNameLanguages.reduce(
             (acc: Record<string, string[]>, item: string, index: number) => {
-                acc[item] = displayNames[index].split(';');
+                acc[item] = displayNames[index].split('|');
                 return acc;
             },
             {},

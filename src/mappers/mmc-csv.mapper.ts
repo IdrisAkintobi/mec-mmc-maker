@@ -21,7 +21,7 @@ export class MMCMapper {
     static map(data: MMCCSVData): MMCSchemaType {
         //Number of Experience IDs must be equal to number of Presentation IDs
         // Handle missing IDs with safe defaults
-        const experienceIDs = data.ExperienceID?.split(';') || [''];
+        const experienceIDs = data.ExperienceID?.split('|') || [''];
         const presentationIDs = data.PresentationID?.split('||') || [''];
         if (experienceIDs.length !== presentationIDs.length) {
             throw new Error('ExperienceID and PresentationID must be of the same length');
@@ -61,10 +61,10 @@ export class MMCMapper {
     }
 
     private static mapALIDExperience(data: MMCCSVData): manifestALIDExperienceMap['manifest:ALIDExperienceMap'] {
-        const alid = data.ALID?.split(';') || [''];
+        const alid = data.ALID?.split('|') || [''];
 
         // Auto-derive ALIDExperienceID from ExperienceID (redundancy removal)
-        const alidExperienceID = data.ExperienceID?.split(';') || [''];
+        const alidExperienceID = data.ExperienceID?.split('|') || [''];
 
         if (alid.length !== alidExperienceID.length) {
             console.log({ alid, alidExperienceID });
@@ -84,9 +84,9 @@ export class MMCMapper {
     }
 
     private static mapExperience(data: MMCCSVData): manifestExperience[] {
-        const experienceID = data.ExperienceID?.split(';') || [''];
-        const experienceType = data.ExperienceType.split(';');
-        const experienceSubType = data.ExperienceSubType.split(';');
+        const experienceID = data.ExperienceID?.split('|') || [''];
+        const experienceType = data.ExperienceType.split('|');
+        const experienceSubType = data.ExperienceSubType.split('|');
         const presentationID = data.PresentationID?.split('||') || [''];
 
         // check if it is an episode or season
@@ -128,8 +128,8 @@ export class MMCMapper {
         if (!experienceId || !relationship) {
             return [];
         }
-        const childExperienceID = experienceId.split(';');
-        const childRelationship = relationship.split(';');
+        const childExperienceID = experienceId.split('|');
+        const childRelationship = relationship.split('|');
 
         if (childExperienceID.length !== childRelationship.length) {
             console.log({ experienceId, relationship });
@@ -175,7 +175,7 @@ export class MMCMapper {
     }
 
     private static mapPictureGroupImages(data: string): string[] {
-        const pictureGroupImages = data.split(';');
+        const pictureGroupImages = data.split('|');
         return pictureGroupImages.map(i => i.trim());
     }
 
@@ -220,35 +220,35 @@ export class MMCMapper {
     }
 
     private static mapPresentationVid(data: string): manifestVideoTrackReference[] {
-        const presentationVid = data.split(';');
+        const presentationVid = data.split('|');
         return presentationVid.map(i => ({
             'manifest:VideoTrackID': i,
         }));
     }
 
     private static mapPresentationAud(data: string): manifestAudioTrackReference[] {
-        const presentationAud = data.split(';');
+        const presentationAud = data.split('|');
         return presentationAud.map(i => ({
             'manifest:AudioTrackID': i,
         }));
     }
 
     private static mapPresentationSub(data: string): manifestSubtitleTrackReference[] {
-        const presentationSub = data.split(';');
+        const presentationSub = data.split('|');
         return presentationSub.map(i => ({
             'manifest:SubtitleTrackID': i,
         }));
     }
 
     private static mapSubtitles(data: MMCCSVData): manifestSubtitle[] {
-        const subtitleIDs = data.SubtitleTrackID?.split(';') || [''];
-        const types = data.SubtitleType.split(';');
-        const languages = data.SubtitleLanguage.split(';');
-        const locations = data.SubtitleLocation.split(';');
-        const hashes = data.SubtitleHash?.split(';') || [];
-        const frameRate = data.SubtitleFrameRate.split(';');
-        const frameRateMultiplier = data.SubtitleFrameRateMultiplier?.split(';') || [];
-        const frameRateTimecode = data.SubtitleFrameRateTimeCode?.split(';') || [];
+        const subtitleIDs = data.SubtitleTrackID?.split('|') || [''];
+        const types = data.SubtitleType.split('|');
+        const languages = data.SubtitleLanguage.split('|');
+        const locations = data.SubtitleLocation.split('|');
+        const hashes = data.SubtitleHash?.split('|') || [];
+        const frameRate = data.SubtitleFrameRate.split('|');
+        const frameRateMultiplier = data.SubtitleFrameRateMultiplier?.split('|') || [];
+        const frameRateTimecode = data.SubtitleFrameRateTimeCode?.split('|') || [];
 
         // check if all REQUIRED arrays have the same length
         if (
@@ -308,10 +308,10 @@ export class MMCMapper {
     }
 
     private static mapImages(data: MMCCSVData): manifestImage[] {
-        const imageIDs = data.ImageID?.split(';') || [''];
-        const purposes = data.ImagePurpose.split(';');
-        const languages = data.ImageLanguage.split(';');
-        const locations = data.ImageLocation.split(';');
+        const imageIDs = data.ImageID?.split('|') || [''];
+        const purposes = data.ImagePurpose.split('|');
+        const languages = data.ImageLanguage.split('|');
+        const locations = data.ImageLocation.split('|');
 
         // check if all arrays have the same length
         if (imageIDs.length !== purposes.length || languages.length !== locations.length) {
@@ -336,11 +336,11 @@ export class MMCMapper {
     }
 
     private static mapAudios(data: MMCCSVData): manifestAudio[] {
-        const trackIDs = data.AudioTrackID?.split(';') || [''];
-        const types = data.AudioType.split(';');
-        const languages = data.AudioLanguage.split(';');
-        const locations = data.AudioLocation.split(';');
-        const hashes = data.AudioHash?.split(';') || [];
+        const trackIDs = data.AudioTrackID?.split('|') || [''];
+        const types = data.AudioType.split('|');
+        const languages = data.AudioLanguage.split('|');
+        const locations = data.AudioLocation.split('|');
+        const hashes = data.AudioHash?.split('|') || [];
 
         // check if all arrays have the same length
         if (trackIDs.length !== types.length || languages.length !== locations.length) {
@@ -397,21 +397,21 @@ export class MMCMapper {
         if (!data.HeightPixels) throw new Error(`HeightPixels is required. HeightPixels value: "${data.HeightPixels}"`);
         if (!data.WidthPixels) throw new Error(`WidthPixels is required. WidthPixels value: "${data.WidthPixels}"`);
 
-        const trackIDs = data.VideoTrackID?.split(';') || [''];
-        const types = data.VideoType.split(';');
-        const languages = data.VideoLanguage.split(';');
-        const locations = data.VideoLocation.split(';');
-        const hashes = data.VideoHash?.split(';') || [];
-        const heightPx = data.HeightPixels.split(';');
-        const widthPx = data.WidthPixels.split(';');
+        const trackIDs = data.VideoTrackID?.split('|') || [''];
+        const types = data.VideoType.split('|');
+        const languages = data.VideoLanguage.split('|');
+        const locations = data.VideoLocation.split('|');
+        const hashes = data.VideoHash?.split('|') || [];
+        const heightPx = data.HeightPixels.split('|');
+        const widthPx = data.WidthPixels.split('|');
 
         // Auto-calculate aspect ratio if not provided
         const aspectRatio = data.AspectRatio
-            ? data.AspectRatio.split(';')
+            ? data.AspectRatio.split('|')
             : widthPx.map((width, i) => calculateAspectRatio(width, heightPx[i]));
 
-        const progressive = data.Progressive?.split(';') || [];
-        const progressiveScanOrder = data.ProgressiveScanOrder?.split(';') || [];
+        const progressive = data.Progressive?.split('|') || [];
+        const progressiveScanOrder = data.ProgressiveScanOrder?.split('|') || [];
 
         // check if all arrays have the same length
         if (trackIDs.length !== types.length || languages.length !== locations.length) {

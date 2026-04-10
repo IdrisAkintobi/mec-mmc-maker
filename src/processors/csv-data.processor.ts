@@ -64,8 +64,8 @@ export const dataToMECXml = (data: MECCSVData, organization: string = 'wiflix'):
 export const dataToMMCXml = (data: MMCCSVData, organization: string = 'wiflix'): string | null => {
     // Validate video types before processing
     if (data.VideoType) {
-        const videoTypes = data.VideoType.split(';');
-        const videoTrackIDs = data.VideoTrackID?.split(';') || [];
+        const videoTypes = data.VideoType.split('|');
+        const videoTrackIDs = data.VideoTrackID?.split('|') || [];
 
         const errors: string[] = [];
         videoTypes.forEach((type, index) => {
@@ -84,8 +84,8 @@ export const dataToMMCXml = (data: MMCCSVData, organization: string = 'wiflix'):
 
     // Validate audio types before processing
     if (data.AudioType) {
-        const audioTypes = data.AudioType.split(';');
-        const audioTrackIDs = data.AudioTrackID?.split(';') || [];
+        const audioTypes = data.AudioType.split('|');
+        const audioTrackIDs = data.AudioTrackID?.split('|') || [];
 
         const errors: string[] = [];
         audioTypes.forEach((type, index) => {
@@ -104,8 +104,8 @@ export const dataToMMCXml = (data: MMCCSVData, organization: string = 'wiflix'):
 
     // Validate subtitle types before processing
     if (data.SubtitleType) {
-        const subtitleTypes = data.SubtitleType.split(';');
-        const subtitleTrackIDs = data.SubtitleTrackID?.split(';') || [];
+        const subtitleTypes = data.SubtitleType.split('|');
+        const subtitleTrackIDs = data.SubtitleTrackID?.split('|') || [];
 
         const errors: string[] = [];
         subtitleTypes.forEach((type, index) => {

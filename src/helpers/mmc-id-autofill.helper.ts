@@ -77,7 +77,7 @@ export function autofillMMCIDs<T extends MMCDataWithIDs>(data: T, organization: 
         if (!location) return undefined;
 
         // Count how many items (split by ';')
-        const locations = location.split(';').filter(l => l.trim());
+        const locations = location.split('|').filter(l => l.trim());
 
         if (locations.length === 1) {
             // Single track
@@ -102,7 +102,7 @@ export function autofillMMCIDs<T extends MMCDataWithIDs>(data: T, organization: 
     // Helper function to generate image IDs
     const generateImageID = (location: string | undefined): string | undefined => {
         if (!location) return undefined;
-        const locations = location.split(';').filter(l => l.trim());
+        const locations = location.split('|').filter(l => l.trim());
         if (locations.length === 1) {
             return `md:imageid:org:${organization}:${contentSlug}:cover.art`;
         } else {
