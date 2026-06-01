@@ -36,13 +36,13 @@ export function calculateAspectRatio(widthPixels: string, heightPixels: string):
  * null means no fixed ratio is enforced (e.g. title art is a transparent PNG).
  */
 const ART_REFERENCE_RATIOS: Record<string, string | null> = {
-    cover:           '16:9',
-    hero:            '16:9',
-    episodic:        '16:9',
+    cover: '16:9',
+    hero: '16:9',
+    episodic: '16:9',
     'trailer-bonus': '16:9',
-    poster:          '2:3',
+    poster: '2:3',
     'carousel-hero': '8:3',
-    title:           null,
+    title: null,
 };
 
 /**
@@ -51,7 +51,7 @@ const ART_REFERENCE_RATIOS: Record<string, string | null> = {
  *   seasons / series → 4:3 (landscape)
  */
 const BOXART_RATIO_BY_WORKTYPE: Record<string, string> = {
-    movie:  '3:4',
+    movie: '3:4',
     season: '4:3',
     series: '4:3',
 };
@@ -91,7 +91,7 @@ export function validateArtReferenceResolution(resolution: string, purpose: stri
             if (actual !== expected) {
                 throw new Error(
                     `ArtReference resolution mismatch for purpose="${purpose}" (workType="${workType}"): ` +
-                    `"${resolution}" has ratio ${actual}, expected ${expected}.`,
+                        `"${resolution}" has ratio ${actual}, expected ${expected}.`,
                 );
             }
         } else {
@@ -99,7 +99,7 @@ export function validateArtReferenceResolution(resolution: string, purpose: stri
             if (!['4:3', '3:4'].includes(actual)) {
                 throw new Error(
                     `ArtReference resolution mismatch for purpose="${purpose}": ` +
-                    `"${resolution}" has ratio ${actual}, expected 4:3 (seasons/series) or 3:4 (movies).`,
+                        `"${resolution}" has ratio ${actual}, expected 4:3 (seasons/series) or 3:4 (movies).`,
                 );
             }
         }
@@ -117,7 +117,7 @@ export function validateArtReferenceResolution(resolution: string, purpose: stri
     if (actual !== expected) {
         throw new Error(
             `ArtReference resolution mismatch for purpose="${purpose}": ` +
-            `"${resolution}" has ratio ${actual}, expected ${expected}.`,
+                `"${resolution}" has ratio ${actual}, expected ${expected}.`,
         );
     }
 }
