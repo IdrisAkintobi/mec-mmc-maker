@@ -1,3 +1,4 @@
+import { validateArtReferenceResolution } from '../helpers/aspect-ratio.helper';
 import { ImageOnlyCSVData } from '../types/csv/image-only-parsed.type';
 import { ImageOnly, MdAltIdentifier, MdArtReference, MdLocalizedInfo } from '../types/csv/image-only-schema.type';
 
@@ -39,7 +40,6 @@ export class ImageOnlyMapper {
         const resolution = data['ArtReference:resolution'].split('|');
         const purpose = data['ArtReference:purpose'].split('|');
 
-        // check if all arrays have the same length
         if (reference.length !== resolution.length || reference.length !== purpose.length) {
             console.log({ reference, resolution, purpose });
             throw new Error(
@@ -50,9 +50,12 @@ export class ImageOnlyMapper {
         const artReference = [];
 
         for (let i = 0; i < reference.length; i++) {
+            const res = resolution[i]?.trim();
+            const purp = purpose[i]?.trim();
+            validateArtReferenceResolution(res, purp);
             artReference.push({
-                '@resolution': resolution[i]?.trim(),
-                '@purpose': purpose[i]?.trim(),
+                '@resolution': res,
+                '@purpose': purp,
                 $: reference[i]?.trim(),
             });
         }

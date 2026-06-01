@@ -1,3 +1,4 @@
+import { validateArtReferenceResolution } from '../helpers/aspect-ratio.helper';
 import { titleToSlug } from '../helpers/auto-populate.helper';
 import { generateTitleSort } from '../helpers/title-sort.helper';
 import { RelationshipTypeEnum } from '../types/csv/enum/domain.enums';
@@ -113,8 +114,8 @@ export class MECMapper {
         const reference = data['ArtReference'].split('|');
         const resolution = data['ArtReference:resolution'].split('|');
         const purpose = data['ArtReference:purpose'].split('|');
+        const workType = data['WorkType']?.toLowerCase();
 
-        // check if all arrays have the same length
         if (reference.length !== resolution.length || reference.length !== purpose.length) {
             console.log({ reference, resolution, purpose });
             throw new Error(
@@ -125,9 +126,12 @@ export class MECMapper {
         const artReference = [];
 
         for (let i = 0; i < reference.length; i++) {
+            const res = resolution[i]?.trim();
+            const purp = purpose[i]?.trim();
+            validateArtReferenceResolution(res, purp, workType);
             artReference.push({
-                '@resolution': resolution[i]?.trim(),
-                '@purpose': purpose[i]?.trim(),
+                '@resolution': res,
+                '@purpose': purp,
                 $: reference[i]?.trim(),
             });
         }
