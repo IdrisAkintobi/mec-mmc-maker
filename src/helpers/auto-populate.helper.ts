@@ -23,14 +23,14 @@ export interface AutoPopulateConfig {
 }
 
 /**
- * Convert title to URL-safe slug
- * @param title - Display title (e.g., "The Matrix: Reloaded")
- * @returns URL-safe slug (e.g., "the-matrix-reloaded")
+ * Convert title to content ID slug using underscores
+ * @param title - Display title (e.g., "The Evolution of Football Season 1")
+ * @returns Underscore-joined slug preserving original case (e.g., "The_Evolution_of_Football_Season_1")
  *
  * @example
- * titleToSlug("The Matrix") // returns "the-matrix"
- * titleToSlug("Spider-Man 2") // returns "spider-man-2"
- * titleToSlug("Game_of_Thrones") // returns "game_of_thrones"
+ * titleToSlug("The Evolution of Football Season 1") // returns "The_Evolution_of_Football_Season_1"
+ * titleToSlug("Spider-Man 2") // returns "Spider-Man_2"
+ * titleToSlug("Game_of_Thrones") // returns "Game_of_Thrones"
  */
 export function titleToSlug(title: string): string {
     if (!title) {
@@ -38,11 +38,10 @@ export function titleToSlug(title: string): string {
     }
 
     return title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s\-_]/g, '') // Remove special characters, preserve hyphens and underscores
-        .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-        .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters, preserve hyphens and underscores
+        .replace(/\s+/g, '_') // Replace spaces with underscores
+        .replace(/_+/g, '_') // Replace multiple underscores with single underscore
+        .replace(/^_|_$/g, ''); // Remove leading/trailing underscores
 }
 
 /**
