@@ -44,6 +44,13 @@ export class MECBuilder {
                 '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
                 '@xsi:schemaLocation': 'http://www.movielabs.com/schema/mdmec/v2.9 ../mdmec-v2.9.xsd',
                 'mdmec:Basic': this.buildBasicMetadata(data),
+                // CompanyDisplayCredit is a sibling of Basic under CoreMetadata, not inside Basic.
+                'mdmec:CompanyDisplayCredit': {
+                    'md:DisplayString': {
+                        '@language': data.companyDisplayCredit.language,
+                        $: data.companyDisplayCredit.value,
+                    },
+                },
             },
         };
 
@@ -66,22 +73,17 @@ export class MECBuilder {
                 '@organizationID': data.organization.id,
                 '@role': data.organization.role,
             },
-            'mdmec:CompanyDisplayCredit': {
-                'md:DisplayString': {
-                    '@language': data.companyDisplayCredit.language,
-                    $: data.companyDisplayCredit.value,
-                },
-            },
+            // SequenceInfo precedes Parent; both are the final Basic elements (episodes/seasons).
             ...(data.category && {
-                'md:Parent': {
-                    '@relationshipType': this.getRelationshipType(data.category.type),
-                    'md:ParentContentID': data.category.parentContentId,
-                },
                 ...(data.category.sequenceNumber && {
                     'md:SequenceInfo': {
                         'md:Number': data.category.sequenceNumber,
                     },
                 }),
+                'md:Parent': {
+                    '@relationshipType': this.getRelationshipType(data.category.type),
+                    'md:ParentContentID': data.category.parentContentId,
+                },
             }),
         };
     }
@@ -99,7 +101,12 @@ export class MECBuilder {
                     $: art.reference,
                 })),
             }),
-            ...(info.summary190 && { 'md:Summary190': info.summary190 }),
+            // Both are XSD-optional (minOccurs=0). Summary190 may be empty — Amazon doesn't
+            // require its content — so emit it (matches Amazon's templates). Summary400 must have
+            // real content for Amazon: never emit it empty; omit when absent so the missing-data
+            // gap stays visible (callers surface a "Missing Summary400" warning) instead of being
+            // hidden behind a structurally-valid-but-rejected empty element.
+            'md:Summary190': info.summary190 ?? '',
             ...(info.summary400 && { 'md:Summary400': info.summary400 }),
             // Add genre only to the first localized info (default language)
             ...(index === 0 && genre.length > 0 && { 'md:Genre': this.buildGenre(genre) }),
@@ -135,21 +142,23 @@ export class MECBuilder {
         };
     }
 
+    /**
+     * Each cast/crew member is its own repeated `md:People` element (Amazon's templates do
+     * NOT wrap them in `md:Person`); returns the array so the caller emits repeated People.
+     */
     private static buildCastMembers(cast: CastMember[]) {
-        return {
-            'md:Person': cast.map(member => ({
-                'md:Job': {
-                    'md:JobFunction': member.jobFunction,
-                    'md:BillingBlockOrder': member.billingBlockOrder,
-                },
-                'md:Name': {
-                    'md:DisplayName': Object.entries(member.displayName).map(([lang, name]) => ({
-                        '@language': lang,
-                        $: name,
-                    })),
-                },
-            })),
-        };
+        return cast.map(member => ({
+            'md:Job': {
+                'md:JobFunction': member.jobFunction,
+                'md:BillingBlockOrder': member.billingBlockOrder,
+            },
+            'md:Name': {
+                'md:DisplayName': Object.entries(member.displayName).map(([lang, name]) => ({
+                    '@language': lang,
+                    $: name,
+                })),
+            },
+        }));
     }
 
     private static getRelationshipType(category: string): string {

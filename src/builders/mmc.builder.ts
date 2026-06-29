@@ -1,4 +1,3 @@
-import { calculateAspectRatio } from '../helpers/aspect-ratio.helper';
 import { validateAudioTracks, validateSubtitleTracks, validateVideoTracks } from '../helpers/validation.helper';
 import { XML_PREFIX, xmlBuilder } from '../infrastructure/xml.builder';
 import { MMCData } from '../types/mmc.types';
@@ -30,10 +29,16 @@ export class MMCBuilder {
         }
         const xmlObj = {
             'manifest:MediaManifest': {
-                '@xmlns:manifest': 'http://www.movielabs.com/schema/manifest/v1.9/manifest',
+                '@xmlns:manifest': 'http://www.movielabs.com/schema/manifest/v1.10/manifest',
                 '@xmlns:md': 'http://www.movielabs.com/schema/md/v2.9/md',
                 '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                '@xsi:schemaLocation': 'http://www.movielabs.com/schema/manifest/v1.9/manifest manifest-v1.9.xsd',
+                '@xsi:schemaLocation': 'http://www.movielabs.com/schema/manifest/v1.10/manifest manifest-v1.10.xsd',
+                // Compatibility is required as the first child of MediaManifest. Default to the
+                // Amazon-current profile (SpecVersion 1.10 / MMC-1) unless the caller overrides.
+                'manifest:Compatibility': {
+                    'manifest:SpecVersion': data.compatibility?.specVersion ?? '1.10',
+                    'manifest:Profile': data.compatibility?.profile ?? 'MMC-1',
+                },
                 'manifest:Inventory': this.buildInventory(data),
                 'manifest:Presentations': this.buildPresentations(data),
                 ...(data.pictureGroup && {
@@ -47,56 +52,64 @@ export class MMCBuilder {
         return XML_PREFIX + xmlBuilder.build(xmlObj);
     }
 
+    /** ContainerReference with an optional MD5 hash (`<manifest:Hash method="MD5">`). */
+    private static containerReference(location: string, hash?: string) {
+        return {
+            'manifest:ContainerLocation': location,
+            ...(hash && { 'manifest:Hash': { '@method': 'MD5', $: hash } }),
+        };
+    }
+
     private static buildInventory(data: MMCData) {
         return {
             'manifest:Audio': data.audio.map(audio => ({
                 '@AudioTrackID': audio.trackId,
-                'md:Type': audio.dubbed ? { '@dubbed': 'true', $: audio.type } : audio.type,
+                // dubbed/forced -> attributes on md:Type (textNodeName '$' carries the value).
+                'md:Type':
+                    audio.dubbed || audio.forced
+                        ? {
+                              ...(audio.dubbed && { '@dubbed': 'true' }),
+                              ...(audio.forced && { '@forced': 'true' }),
+                              $: audio.type,
+                          }
+                        : audio.type,
                 'md:Language': audio.language,
-                'manifest:ContainerReference': {
-                    'manifest:ContainerLocation': audio.location,
-                    ...(audio.hash && { 'manifest:Hash': audio.hash }),
-                },
+                'manifest:ContainerReference': this.containerReference(audio.location, audio.hash),
             })),
             'manifest:Video': data.video.map(video => ({
                 '@VideoTrackID': video.trackId,
+                // Element order matches the Amazon templates: Type, Language, Picture, ContainerReference.
                 'md:Type': video.type,
                 'md:Language': video.language,
-                'manifest:ContainerReference': {
-                    'manifest:ContainerLocation': video.location,
-                    ...(video.hash && { 'manifest:Hash': video.hash }),
-                },
                 'md:Picture': {
                     'md:WidthPixels': video.picture.widthPixels,
                     'md:HeightPixels': video.picture.heightPixels,
-                    // Auto-calculate aspect ratio if not provided
-                    'md:AspectRatio':
-                        video.picture.aspectRatio ??
-                        calculateAspectRatio(video.picture.widthPixels, video.picture.heightPixels),
+                    // AspectRatio is optional and omitted by Amazon's templates; emit only when provided.
+                    ...(video.picture.aspectRatio && { 'md:AspectRatio': video.picture.aspectRatio }),
                     ...(video.picture.progressive !== undefined && {
-                        'md:Progressive': video.picture.progressive,
-                    }),
-                    ...(video.picture.progressiveScanOrder && {
-                        'md:ProgressiveScanOrder': video.picture.progressiveScanOrder,
+                        // scanOrder (e.g. TFF) is an attribute on md:Progressive, not a separate element.
+                        'md:Progressive': video.picture.progressiveScanOrder
+                            ? { '@scanOrder': video.picture.progressiveScanOrder, $: video.picture.progressive }
+                            : video.picture.progressive,
                     }),
                 },
+                'manifest:ContainerReference': this.containerReference(video.location, video.hash),
             })),
             ...(data.subtitle && {
                 'manifest:Subtitle': data.subtitle.map(sub => ({
                     '@SubtitleTrackID': sub.trackId,
+                    ...(sub.format && { 'md:Format': sub.format }),
                     'md:Type': sub.type,
                     'md:Language': sub.language,
-                    'manifest:ContainerReference': {
-                        'manifest:ContainerLocation': sub.location,
-                        ...(sub.hash && { 'manifest:Hash': sub.hash }),
+                    // md:Encoding/md:FrameRate with multiplier + timecode attributes (md namespace).
+                    'md:Encoding': {
+                        'md:FrameRate': {
+                            ...(sub.frameRateMultiplier && { '@multiplier': sub.frameRateMultiplier }),
+                            '@timecode': sub.frameRateTimeCode || 'NonDrop',
+                            $: sub.frameRate,
+                        },
                     },
-                    'manifest:Encoding': {
-                        'manifest:FrameRate': sub.frameRate,
-                        ...(sub.frameRateMultiplier && {
-                            'manifest:FrameRateMultiplier': sub.frameRateMultiplier,
-                        }),
-                        'manifest:TimeCodeDropFrame': sub.frameRateTimeCode || 'NonDrop',
-                    },
+                    'manifest:ContainerReference': this.containerReference(sub.location, sub.hash),
                 })),
             }),
             ...(data.image && {
@@ -104,9 +117,7 @@ export class MMCBuilder {
                     '@ImageID': img.id,
                     'md:Purpose': img.purpose,
                     'md:Language': img.language,
-                    'manifest:ContainerReference': {
-                        'manifest:ContainerLocation': img.location,
-                    },
+                    'manifest:ContainerReference': this.containerReference(img.location),
                 })),
             }),
         };
@@ -114,17 +125,29 @@ export class MMCBuilder {
 
     private static buildPresentations(data: MMCData) {
         return {
-            'manifest:Presentation': data.presentation.map(pres => ({
-                '@PresentationID': pres.id,
-                'manifest:TrackMetadata': {
-                    'manifest:TrackSelectionNumber': pres.trackNum,
-                    'manifest:VideoTrackReference': pres.videoId,
-                    'manifest:AudioTrackReference': pres.audioId,
-                    ...(pres.subtitleId && {
-                        'manifest:SubtitleTrackReference': pres.subtitleId,
-                    }),
-                },
-            })),
+            'manifest:Presentation': data.presentation.map(pres => {
+                // Each track reference wraps its ID element; a presentation may carry multiple
+                // audio and subtitle references (one element each).
+                const audioIds = pres.audioIds ?? (pres.audioId ? [pres.audioId] : []);
+                const subtitleIds = pres.subtitleIds ?? (pres.subtitleId ? [pres.subtitleId] : []);
+                return {
+                    '@PresentationID': pres.id,
+                    'manifest:TrackMetadata': {
+                        'manifest:TrackSelectionNumber': pres.trackNum ?? '0',
+                        ...(pres.videoId && {
+                            'manifest:VideoTrackReference': { 'manifest:VideoTrackID': pres.videoId },
+                        }),
+                        ...(audioIds.length && {
+                            'manifest:AudioTrackReference': audioIds.map(id => ({ 'manifest:AudioTrackID': id })),
+                        }),
+                        ...(subtitleIds.length && {
+                            'manifest:SubtitleTrackReference': subtitleIds.map(id => ({
+                                'manifest:SubtitleTrackID': id,
+                            })),
+                        }),
+                    },
+                };
+            }),
         };
     }
 
@@ -132,6 +155,7 @@ export class MMCBuilder {
         return data.pictureGroup?.map(group => ({
             '@PictureGroupID': group.id,
             'manifest:Picture': {
+                ...(group.pictureId && { 'manifest:PictureID': group.pictureId }),
                 'manifest:ImageID': group.imageIds.map(id => ({ $: id })),
             },
         }));
@@ -141,10 +165,17 @@ export class MMCBuilder {
         return {
             'manifest:Experience': data.experience.map(exp => ({
                 '@ExperienceID': exp.id,
+                // Amazon's templates carry version="1.0" on each Experience.
+                '@version': exp.version ?? '1.0',
                 'manifest:Audiovisual': {
                     'manifest:Type': exp.type,
-                    'manifest:SubType': exp.subType,
+                    // SubType is required for Trailer/Bonus and used for the feature ("Feature");
+                    // omit the element entirely when empty rather than emitting <manifest:SubType/>.
+                    ...(exp.subType && { 'manifest:SubType': exp.subType }),
+                    ...(exp.presentationId && { 'manifest:PresentationID': exp.presentationId }),
                 },
+                // PictureGroupID and ExperienceChild follow Audiovisual, in that order.
+                ...(exp.pictureGroupId && { 'manifest:PictureGroupID': exp.pictureGroupId }),
                 ...(exp.child && {
                     'manifest:ExperienceChild': {
                         'manifest:Relationship': exp.child.relationship,
@@ -159,8 +190,9 @@ export class MMCBuilder {
         return {
             'manifest:ALIDExperienceMap': data.alidExperience.map((map, index) => ({
                 'manifest:ALID': map.alid,
-                // Auto-derive experienceId from corresponding experience
-                'manifest:ExperienceID': data.experience[index]?.id,
+                // Use the explicit mapping when given (required once there is >1 experience,
+                // e.g. feature + trailer); fall back to positional pairing for legacy callers.
+                'manifest:ExperienceID': map.experienceId ?? data.experience[index]?.id,
             })),
         };
     }

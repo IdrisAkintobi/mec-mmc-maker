@@ -1,4 +1,4 @@
-import { AudioType, ExperienceType, ImagePurpose, VideoType } from '../../src/types/mmc.types';
+import { AudioType, AudiovisualType, AudiovisualSubType, ImagePurpose, VideoType } from '../../src/types/mmc.types';
 
 export const sampleMMCData = {
     audio: [
@@ -35,7 +35,7 @@ export const sampleMMCData = {
             hash: 'ghi789',
             frameRate: '24',
             frameRateMultiplier: '1000/1001',
-            frameRateTimeCode: 'true',
+            frameRateTimeCode: 'NonDrop',
         },
     ],
     image: [
@@ -64,8 +64,8 @@ export const sampleMMCData = {
     experience: [
         {
             id: 'exp1',
-            type: ExperienceType.Movie,
-            subType: 'Feature',
+            type: AudiovisualType.Main,
+            subType: AudiovisualSubType.Feature,
             child: {
                 id: 'exp2',
                 relationship: 'Trailer',

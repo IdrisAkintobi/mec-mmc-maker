@@ -1,6 +1,6 @@
 import { MMCBuilder } from '../src/builders/mmc.builder';
 import { validateXMLStructure } from '../src/helpers/xml-validator';
-import { AudioType, ExperienceType, MMCData, SubtitleType, VideoType } from '../src/types/mmc.types';
+import { AudioType, AudiovisualType, MMCData, SubtitleType, VideoType } from '../src/types/mmc.types';
 import { sampleMMCData as sampleData } from './sample-data/mmc-sample';
 
 describe('MMCBuilder', () => {
@@ -34,7 +34,9 @@ describe('MMCBuilder', () => {
 
             expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
             expect(xml).toContain('<manifest:MediaManifest');
-            expect(xml).toContain('xmlns:manifest="http://www.movielabs.com/schema/manifest/v1.9/manifest"');
+            expect(xml).toContain('xmlns:manifest="http://www.movielabs.com/schema/manifest/v1.10/manifest"');
+            expect(xml).toContain('<manifest:SpecVersion>1.10</manifest:SpecVersion>');
+            expect(xml).toContain('<manifest:Profile>MMC-1</manifest:Profile>');
         });
 
         it('should build inventory correctly', () => {
@@ -50,9 +52,10 @@ describe('MMCBuilder', () => {
             expect(xml).toContain('<md:WidthPixels>1920</md:WidthPixels>');
             expect(xml).toContain('<md:HeightPixels>1080</md:HeightPixels>');
 
-            // Subtitle checks
+            // Subtitle checks — Encoding uses md:FrameRate with a timecode attribute.
             expect(xml).toContain('SubtitleTrackID="sub1"');
-            expect(xml).toContain('<manifest:FrameRate>24</manifest:FrameRate>');
+            expect(xml).toContain('<md:Encoding>');
+            expect(xml).toContain('timecode="NonDrop">24</md:FrameRate>');
         });
 
         it('should build presentations correctly', () => {
@@ -60,7 +63,8 @@ describe('MMCBuilder', () => {
 
             expect(xml).toContain('PresentationID="pres1"');
             expect(xml).toContain('<manifest:TrackSelectionNumber>1</manifest:TrackSelectionNumber>');
-            expect(xml).toContain('<manifest:VideoTrackReference>video1</manifest:VideoTrackReference>');
+            // Track references wrap their ID element (VideoTrackReference > VideoTrackID).
+            expect(xml).toContain('<manifest:VideoTrackID>video1</manifest:VideoTrackID>');
         });
 
         it('should handle optional picture groups correctly', () => {
@@ -75,7 +79,7 @@ describe('MMCBuilder', () => {
             const xml = MMCBuilder.build(sampleMMCData);
 
             expect(xml).toContain('ExperienceID="exp1"');
-            expect(xml).toContain('<manifest:Type>Movie</manifest:Type>');
+            expect(xml).toContain('<manifest:Type>Main</manifest:Type>');
             expect(xml).toContain('<manifest:SubType>Feature</manifest:SubType>');
             expect(xml).toContain('<manifest:Relationship>Trailer</manifest:Relationship>');
         });
@@ -234,7 +238,7 @@ describe('MMCBuilder', () => {
             sampleMMCData.experience = [
                 {
                     id: 'main_movie',
-                    type: ExperienceType.Movie,
+                    type: AudiovisualType.Main,
                     subType: 'Feature',
                     child: {
                         id: 'trailer',
@@ -243,12 +247,12 @@ describe('MMCBuilder', () => {
                 },
                 {
                     id: 'trailer',
-                    type: ExperienceType.Movie,
+                    type: AudiovisualType.Main,
                     subType: 'Trailer',
                 },
                 {
                     id: 'behind_scenes',
-                    type: ExperienceType.Movie,
+                    type: AudiovisualType.Main,
                     subType: 'BehindTheScenes',
                 },
             ];
