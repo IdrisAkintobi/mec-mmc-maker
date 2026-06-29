@@ -51,7 +51,7 @@ export class MMCBuilder {
         return {
             'manifest:Audio': data.audio.map(audio => ({
                 '@AudioTrackID': audio.trackId,
-                'md:Type': audio.type,
+                'md:Type': audio.dubbed ? { '@dubbed': 'true', $: audio.type } : audio.type,
                 'md:Language': audio.language,
                 'manifest:ContainerReference': {
                     'manifest:ContainerLocation': audio.location,
@@ -64,7 +64,7 @@ export class MMCBuilder {
                 'md:Language': video.language,
                 'manifest:ContainerReference': {
                     'manifest:ContainerLocation': video.location,
-                    'manifest:Hash': video.hash,
+                    ...(video.hash && { 'manifest:Hash': video.hash }),
                 },
                 'md:Picture': {
                     'md:WidthPixels': video.picture.widthPixels,

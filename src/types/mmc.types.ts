@@ -41,6 +41,11 @@ export interface AudioTrack {
     location: string;
     /** MD5 hash - OPTIONAL: Not all content providers have hashes */
     hash?: string;
+    /**
+     * Marks a dubbed track. Emits `dubbed="true"` on the `<md:Type>` element, per
+     * Amazon's dubbed-audio requirement. OPTIONAL: omit/false for original-language audio.
+     */
+    dubbed?: boolean;
 }
 
 export interface VideoTrack {
